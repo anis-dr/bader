@@ -1,9 +1,10 @@
 import Versions from './components/Versions'
 import electronLogo from './assets/electron.svg'
-import { trpcReact } from './App'
+import { api } from './providers/trpc'
+
 export const HelloElectron = (): JSX.Element => {
   const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
-  const { data } = trpcReact.greeting.hello.useQuery({ name: 'Electron' })
+  const { data } = api.greeting.hello.useQuery({ name: 'Electron' })
 
   console.log('🚀 ~ data:', data)
   return (
