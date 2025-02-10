@@ -1,8 +1,10 @@
 import { router } from './trpc'
 import { greetingRouter } from './routes/greeting'
+import { messagesRouter } from './routes/messages'
 
 export const appRouter = router({
-  greeting: greetingRouter
+  greeting: greetingRouter,
+  messages: messagesRouter
 })
 
 // Export type router type signature,

@@ -18,7 +18,10 @@
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
-    "build:linux": "electron-vite build && electron-builder --linux"
+    "build:linux": "electron-vite build && electron-builder --linux",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
@@ -26,8 +29,9 @@
     "@trpc/client": "10.33.1",
     "@trpc/react-query": "10.33.1",
     "@trpc/server": "10.33.1",
+    "better-sqlite3": "^11.8.1",
+    "drizzle-orm": "^0.39.2",
     "electron-trpc": "^0.7.1",
-    "sqlite3": "5.0.0",
     "superjson": "^1.12.3",
     "zod": "^3.21.4"
   },
@@ -35,11 +39,13 @@
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",
     "@electron-toolkit/eslint-config-ts": "^2.0.0",
     "@electron-toolkit/tsconfig": "^1.0.1",
+    "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^20.14.8",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
-    "electron": "^31.0.2",
+    "drizzle-kit": "^0.30.4",
+    "electron": "^33.0.2",
     "electron-builder": "^24.13.3",
     "electron-vite": "^2.3.0",
     "eslint": "^8.57.0",
@@ -56,6 +62,10 @@
     "directories": {
       "output": "dist"
     },
+    "files": [
+      "out",
+      "src/main/db/migrations/**/*"
+    ],
     "win": {
       "target": [
         "nsis"

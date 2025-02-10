@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { createIPCHandler } from 'electron-trpc/main'
 import { appRouter } from './router'
+import { initializeDatabase, closeDatabase } from './db'
 
 function createWindow(): void {
   // Create the browser window.
@@ -18,6 +19,8 @@ function createWindow(): void {
       sandbox: false
     }
   })
+
+  createIPCHandler({ router: appRouter, windows: [mainWindow] })
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
@@ -35,15 +38,16 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
-
-  createIPCHandler({ router: appRouter, windows: [mainWindow] })
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  // Set app user model id for windows
+app.whenReady().then(async () => {
+  // Initialize database before setting up the app
+  await initializeDatabase()
+
+  // Set up electron app
   electronApp.setAppUserModelId('com.electron')
 
   // Default open or close DevTools by F12 in development
@@ -70,6 +74,7 @@ app.whenReady().then(() => {
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
+    closeDatabase()
     app.quit()
   }
 })
