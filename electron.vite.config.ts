@@ -4,7 +4,11 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: [
+      externalizeDepsPlugin({
+        include: ['sqlite3']
+      })
+    ]
   },
   preload: {
     plugins: [externalizeDepsPlugin()]

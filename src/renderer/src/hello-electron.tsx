@@ -4,6 +4,7 @@ import { api } from './providers/trpc'
 
 export const HelloElectron = (): JSX.Element => {
   const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
+
   const { data } = api.greeting.hello.useQuery({ name: 'Electron' })
 
   console.log('🚀 ~ data:', data)
