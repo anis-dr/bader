@@ -24,27 +24,16 @@ export const router = t.router
 export const publicProcedure = t.procedure
 export const createCallerFactory = t.createCallerFactory
 
-// Store both the router and caller
-let appRouter: AppRouter | null = null
-let caller: ReturnType<ReturnType<typeof createCallerFactory<AppRouter>>> | null = null
-
-export function initializeCaller(router: AppRouter) {
-  appRouter = router
-  caller = createCallerFactory(router)({})
-}
-
-export function registerTrpcIpcListener() {
+export function registerTrpcIpcListener(appRouter: AppRouter) {
   ipcMain.handle('trpc', (_, payload: TrpcEvent) => {
-    if (!caller || !appRouter) throw new Error('tRPC caller not initialized')
-
     // Create context with metadata
     const ctx: Context = { meta: payload.meta }
 
-    // Create a new caller with context for this request
-    const callerWithContext = createCallerFactory(appRouter)(ctx)
+    // Create a caller with context for this request
+    const caller = createCallerFactory(appRouter)(ctx)
 
     // eslint-disable-next-line @typescript-eslint/ban-types
-    return (callerWithContext[payload.procedureName as keyof typeof caller] as Function)?.(
+    return (caller[payload.procedureName as keyof typeof caller] as Function)?.(
       JSON.parse(payload.data)
     )
   })

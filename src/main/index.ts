@@ -3,7 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { initializeDatabase, closeDatabase } from './db'
-import { registerTrpcIpcListener, initializeCaller } from './trpc'
+import { registerTrpcIpcListener } from './trpc'
 import { appRouter } from './router'
 
 function createWindow(): void {
@@ -46,8 +46,7 @@ app.whenReady().then(async () => {
   await initializeDatabase()
 
   // Initialize tRPC
-  initializeCaller(appRouter)
-  registerTrpcIpcListener()
+  registerTrpcIpcListener(appRouter)
 
   // Set up electron app
   electronApp.setAppUserModelId('com.electron')
