@@ -2,6 +2,11 @@ import Versions from './components/Versions'
 import electronLogo from './assets/electron.svg'
 import { api } from './providers/trpc'
 
+export const Messages = (): JSX.Element => {
+  const { data } = api.messages.getAll.useQuery()
+  return <div>{data?.map((message) => message.content)}</div>
+}
+
 export const HelloElectron = (): JSX.Element => {
   const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
 
@@ -32,6 +37,7 @@ export const HelloElectron = (): JSX.Element => {
         </div>
       </div>
       <Versions></Versions>
+      <Messages />
     </>
   )
 }

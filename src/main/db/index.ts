@@ -3,9 +3,8 @@ import { db, connection } from './config'
 import { join } from 'path'
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3'
 import { app } from 'electron'
-import * as schema from './schema'
 
-export async function initializeDatabase(): Promise<BetterSQLite3Database<typeof schema>> {
+export async function initializeDatabase(): Promise<BetterSQLite3Database> {
   try {
     // Determine the correct migrations path based on the environment
     const isDev = !app.isPackaged

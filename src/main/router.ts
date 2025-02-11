@@ -1,10 +1,10 @@
-import { t } from './trpc'
+import { router } from './trpc'
 import { greetingRouter } from './routes/greeting'
-import { authRouter } from './routes/auth'
+import { messagesRouter } from './routes/messages'
 
-export const appRouter = t.router({
+export const appRouter = router({
   greeting: greetingRouter,
-  auth: authRouter
+  messages: messagesRouter
 })
 
 // Export type router type signature,
