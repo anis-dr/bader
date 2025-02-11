@@ -1,7 +1,6 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { AuthOutput } from 'src/main/routes/auth'
-import { api } from '@renderer/utils/trpc'
 
 type User = AuthOutput['user']
 type Tokens = AuthOutput['tokens']
@@ -26,19 +25,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
   const navigate = useNavigate()
 
-  const refreshAccessToken = useCallback(async (token: string) => {
-    try {
-      const result = await api.auth.refresh.mutate({ refreshToken: token })
-      setAccessToken(result.accessToken)
-      localStorage.setItem(ACCESS_TOKEN_KEY, result.accessToken)
-      return true
-    } catch (error) {
-      console.error('Failed to refresh token:', error)
-      logout()
-      return false
-    }
-  }, [])
-
   useEffect(() => {
     const storedAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY)
     const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
@@ -50,12 +36,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (storedAccessToken) {
         setAccessToken(storedAccessToken)
-      } else {
-        refreshAccessToken(storedRefreshToken)
       }
     }
     setIsLoading(false)
-  }, [refreshAccessToken])
+  }, [])
 
   const login = (newUser: User, newTokens: Tokens) => {
     setUser(newUser)
