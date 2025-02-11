@@ -20,7 +20,7 @@ export function LoginPage() {
     },
     onSuccess: (data) => {
       setErrorMessage('')
-      login(data.user, data.token)
+      login(data.user, data.tokens)
       navigate('/dashboard')
     },
     onError: (error) => {

@@ -5,7 +5,7 @@ import { router, publicProcedure } from '../trpc'
 import { users } from '../db/schema/users'
 import { db } from '../db'
 import { eq } from 'drizzle-orm'
-import { generateToken } from '../utils/jwt'
+import { generateTokens, verifyRefreshToken } from '../utils/jwt'
 import { RouterInput } from '../router'
 
 const SALT_ROUNDS = 10
@@ -21,7 +21,10 @@ const AuthOutputSchema = z.object({
     lastName: z.string().optional().nullable(),
     role: z.string()
   }),
-  token: z.string()
+  tokens: z.object({
+    accessToken: z.string(),
+    refreshToken: z.string()
+  })
 })
 
 export type AuthOutput = z.infer<typeof AuthOutputSchema>
@@ -67,8 +70,8 @@ export const authRouter = router({
         .returning()
         .get()
 
-      // Generate token
-      const token = generateToken({
+      // Generate tokens
+      const tokens = generateTokens({
         userId: newUser.id,
         username: newUser.username,
         firstName: newUser.firstName,
@@ -84,7 +87,7 @@ export const authRouter = router({
           lastName: newUser.lastName,
           role: newUser.role
         },
-        token
+        tokens
       }
     }),
 
@@ -117,8 +120,8 @@ export const authRouter = router({
         })
       }
 
-      // Generate token
-      const token = generateToken({
+      // Generate tokens
+      const tokens = generateTokens({
         userId: user.id,
         username: user.username,
         firstName: user.firstName,
@@ -134,7 +137,33 @@ export const authRouter = router({
           lastName: user.lastName,
           role: user.role
         },
-        token
+        tokens
       }
+    }),
+
+  refresh: publicProcedure
+    .input(z.object({ refreshToken: z.string() }))
+    .output(z.object({ accessToken: z.string() }))
+    .mutation(async ({ input }) => {
+      const { userId } = verifyRefreshToken(input.refreshToken)
+
+      const user = await db.select().from(users).where(eq(users.id, userId)).get()
+
+      if (!user) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'User not found'
+        })
+      }
+
+      const tokens = generateTokens({
+        userId: user.id,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role
+      })
+
+      return { accessToken: tokens.accessToken }
     })
 })

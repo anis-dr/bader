@@ -1,7 +1,12 @@
 import { createTRPCProxyClient, httpLink } from '@trpc/client'
 import { AppRouter } from '../../../main/router'
 
-const AUTH_TOKEN_KEY = 'auth_token'
+const ACCESS_TOKEN_KEY = 'access_token'
+const REFRESH_TOKEN_KEY = 'refresh_token'
+
+interface RefreshResponse {
+  accessToken: string
+}
 
 export const api = createTRPCProxyClient<AppRouter>({
   links: [
@@ -25,42 +30,49 @@ export const api = createTRPCProxyClient<AppRouter>({
         }
 
         // Get the auth token
-        const token = localStorage.getItem(AUTH_TOKEN_KEY)
+        const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY)
+        const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
 
         try {
-          const result = await window.electron.sendTrpcEvent({
-            procedureName,
-            data: typeof data === 'string' ? data : JSON.stringify(data),
-            meta: {
-              headers: {
-                'user-agent': 'My Custom Client',
-                ...(token && { authorization: `Bearer ${token}` })
-              },
-              clientId: 'client-123'
-            }
-          })
+          // First try with access token
+          if (accessToken && procedureName !== 'auth.refresh') {
+            try {
+              const result = await makeRequest(procedureName, data, accessToken)
+              return new Response(JSON.stringify({ result: { data: result } }))
+            } catch (error) {
+              // If unauthorized and we have a refresh token, try refresh flow
+              if (
+                error instanceof Error &&
+                error.message.includes('Invalid or expired token') &&
+                refreshToken
+              ) {
+                // Try to refresh the access token
+                const refreshResult = await makeRequest<RefreshResponse>(
+                  'auth.refresh',
+                  { refreshToken },
+                  null
+                )
+                localStorage.setItem(ACCESS_TOKEN_KEY, refreshResult.accessToken)
 
-          // Format response according to tRPC protocol
-          return new Response(
-            JSON.stringify({
-              result: {
-                data: result
+                // Retry the original request with the new access token
+                const result = await makeRequest(procedureName, data, refreshResult.accessToken)
+                return new Response(JSON.stringify({ result: { data: result } }))
               }
-            })
-          )
-        } catch (error) {
-          console.error('TRPC Error', error)
+              throw error
+            }
+          }
 
-          // Extract the actual error message from the TRPCError
+          // If no access token or refresh token request
+          const result = await makeRequest(procedureName, data, null)
+          return new Response(JSON.stringify({ result: { data: result } }))
+        } catch (error) {
           let errorMessage = 'An unexpected error occurred'
 
           if (error instanceof Error) {
-            // Match everything after "TRPCError: "
             const match = error.message.match(/TRPCError: (.+)$/)
             if (match) {
               errorMessage = match[1]
             } else if (error.message.includes('Error invoking remote method')) {
-              // If it's a remote method error, clean up the message
               errorMessage = error.message.replace(
                 /Error invoking remote method 'trpc': TRPCError: /,
                 ''
@@ -70,12 +82,11 @@ export const api = createTRPCProxyClient<AppRouter>({
             }
           }
 
-          // Format error response according to tRPC protocol
           return new Response(
             JSON.stringify({
               error: {
                 message: errorMessage,
-                code: -32000, // JSON-RPC error code
+                code: -32000,
                 data: {
                   code: 'INTERNAL_SERVER_ERROR',
                   httpStatus: 500,
@@ -95,3 +106,22 @@ export const api = createTRPCProxyClient<AppRouter>({
     })
   ]
 })
+
+async function makeRequest<T = unknown>(
+  procedureName: string,
+  data: Record<string, unknown> | string | null,
+  token: string | null
+): Promise<T> {
+  const response = await window.electron.sendTrpcEvent({
+    procedureName,
+    data: typeof data === 'string' ? data : JSON.stringify(data),
+    meta: {
+      headers: {
+        'user-agent': 'My Custom Client',
+        ...(token && { authorization: `Bearer ${token}` })
+      },
+      clientId: 'client-123'
+    }
+  })
+  return response as T
+}
