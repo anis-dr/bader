@@ -14,7 +14,13 @@ export const api = createTRPCProxyClient<AppRouter>({
 
         const data = await window.electron.sendTrpcEvent({
           procedureName,
-          data: jsonInput ?? 'null'
+          data: jsonInput ?? 'null',
+          meta: {
+            headers: {
+              'user-agent': 'My Custom Client'
+            },
+            clientId: 'client-123'
+          }
         })
 
         return new Response(JSON.stringify({ result: { type: 'data', data } }))
