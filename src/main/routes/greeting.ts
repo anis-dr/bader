@@ -1,6 +1,10 @@
 import { router } from '../trpc'
 import { z } from 'zod'
 import { publicProcedure } from '../trpc'
+import { RouterInput, RouterOutput } from '../router'
+
+export type UserMeOutput = RouterOutput['greeting']['hello']
+export type UserMeInput = RouterInput['greeting']['hello']
 
 export const greetingRouter = router({
   hello: publicProcedure.input(z.object({ name: z.string() })).query(({ input, ctx }) => {
