@@ -6,12 +6,13 @@ import { users } from '../db/schema/users'
 import { db } from '../db'
 import { eq } from 'drizzle-orm'
 import { generateTokens, verifyRefreshToken } from '../utils/jwt'
-import { RouterInput } from '../router'
+import { RouterInput, RouterOutput } from '../router'
 
 const SALT_ROUNDS = 10
 
 export type LoginInput = RouterInput['auth']['login']
 export type RegisterInput = RouterInput['auth']['register']
+export type RefreshTokenOutput = RouterOutput['auth']['refresh']
 
 const AuthOutputSchema = z.object({
   user: z.object({

@@ -1,11 +1,7 @@
 import { createTRPCProxyClient, httpLink } from '@trpc/client'
 import { AppRouter } from '../../../main/router'
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from '@renderer/contexts/auth'
-
-// Types
-interface RefreshResponse {
-  accessToken: string
-}
+import type { RefreshTokenOutput } from 'src/main/routes/auth'
 
 interface RequestConfig {
   procedureName: string
@@ -44,7 +40,7 @@ async function makeRequest<T = unknown>({ procedureName, data, token }: RequestC
 
 // Token refresh handling
 async function handleTokenRefresh(refreshToken: string): Promise<string> {
-  const refreshResult = await makeRequest<RefreshResponse>({
+  const refreshResult = await makeRequest<RefreshTokenOutput>({
     procedureName: 'auth.refresh',
     data: { refreshToken },
     token: null
