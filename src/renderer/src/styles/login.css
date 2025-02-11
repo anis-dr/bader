@@ -1,26 +1,32 @@
 .login-container {
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: var(--color-background);
+  justify-content: center;
+  min-height: 95vh;
+  background: var(--bg-gradient);
+  padding: 10px;
 }
 
 .login-box {
-  background-color: var(--color-background-soft);
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: var(--overlay-light);
+  padding: 2.5rem;
+  border-radius: 20px;
   width: 100%;
-  max-width: 400px;
-  margin: 1rem;
+  max-width: 420px;
+  box-shadow: 0 10px 25px var(--shadow-color);
+  backdrop-filter: blur(10px);
 }
 
-.login-box h1 {
-  color: var(--color-text);
+.logo-container {
   text-align: center;
   margin-bottom: 2rem;
-  font-size: 1.8rem;
+}
+
+.logo {
+  width: 180px;
+  height: auto;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 }
 
 .login-form {
@@ -29,84 +35,117 @@
   gap: 1.5rem;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.login-form-group {
+  position: relative;
 }
 
-.form-group label {
-  color: var(--color-text);
-  font-size: 0.9rem;
+.login-form-group label {
+  position: absolute;
+  left: 15px;
+  top: -10px;
+  background: var(--bg-white);
+  padding: 0 6px;
+  font-size: 0.85rem;
+  color: var(--text-gray);
   font-weight: 500;
 }
 
-.form-group input {
-  padding: 0.75rem;
-  border: 1px solid var(--ev-c-gray-1);
-  border-radius: 4px;
-  background-color: var(--color-background-mute);
-  color: var(--color-text);
+.login-form-group input {
+  width: 90%;
+  padding: 1rem;
+  border: 2px solid var(--input-border);
+  border-radius: 12px;
   font-size: 1rem;
-  transition: border-color 0.2s ease;
+  transition: all 0.3s ease;
+  background: var(--input-bg);
+  color: var(--text-dark);
 }
 
-.form-group input:focus {
+.login-form-group input::placeholder {
+  color: var(--placeholder-color);
+}
+
+.login-form-group input:focus {
   outline: none;
-  border-color: var(--ev-c-gray-2);
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
-.form-group input::placeholder {
-  color: var(--ev-c-text-3);
-}
-
-.login-button {
-  background-color: var(--ev-c-gray-2);
-  color: var(--color-text);
+.login-btn {
+  background: var(--btn-primary-gradient);
+  color: var(--text-white);
+  padding: 1rem;
   border: none;
-  padding: 0.75rem;
-  border-radius: 4px;
+  border-radius: 12px;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.login-button:hover {
-  background-color: var(--ev-c-gray-1);
+.login-btn:hover {
+  background: var(--btn-hover-gradient);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px var(--shadow-color);
 }
 
-.login-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--ev-c-gray-1);
-}
-
-.auth-link {
-  text-align: center;
-  color: var(--color-text);
-  font-size: 0.9rem;
-}
-
-.auth-link a {
-  color: var(--ev-c-gray-1);
-  text-decoration: none;
-  font-weight: 500;
-  margin-left: 0.25rem;
-  transition: color 0.2s ease;
-}
-
-.auth-link a:hover {
-  color: var(--color-text);
-  text-decoration: underline;
+.login-btn:active {
+  transform: translateY(0);
 }
 
 .error-message {
-  background-color: #fee2e2;
-  border: 1px solid #ef4444;
-  color: #dc2626;
-  padding: 0.75rem;
-  border-radius: 0.375rem;
-  margin-bottom: 1rem;
-  font-size: 0.875rem;
+  background-color: var(--danger-light);
+  color: var(--bg-white);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
   text-align: center;
+  animation: shake 0.5s ease-in-out;
 }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.login-btn:disabled {
+  background: var(--text-light);
+  cursor: not-allowed;
+}
+
+.login-form-group input.error {
+  border-color: var(--danger);
+  background-color: rgba(231, 76, 60, 0.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .login-box {
+    padding: 2rem;
+  }
+
+  .logo {
+    width: 150px;
+  }
+}
+
+/* Animation for error message */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.error-message {
+  animation: slideIn 0.3s ease forwards;
+} 

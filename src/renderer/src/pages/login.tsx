@@ -6,6 +6,8 @@ import { useMutation } from '@tanstack/react-query'
 import { LoginInput } from 'src/main/routes/auth'
 import { TRPCClientError } from '@trpc/client'
 import { useAuth } from '@renderer/contexts/auth'
+import '../styles/login.css'
+import Logo from '@renderer/assets/caisstek.png'
 
 export function LoginPage() {
   const [username, setUsername] = useState('')
@@ -41,41 +43,49 @@ export function LoginPage() {
   return (
     <div className="login-container">
       <div className="login-box">
-        <h1>Welcome Back</h1>
+        <div className="logo-container">
+          <img src={Logo} alt="Logo" className="logo" />
+        </div>
+
+        {errorMessage && <div className="error-message">{errorMessage}</div>}
+
         <form onSubmit={handleSubmit} className="login-form">
-          {errorMessage && (
-            <div className="error-message" role="alert">
-              {errorMessage}
-            </div>
-          )}
-          <div className="form-group">
+          <div className="login-form-group">
             <label htmlFor="username">Username</label>
             <input
               type="text"
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              required
               placeholder="Enter your username"
+              autoComplete="username"
+              disabled={loginMutation.isPending}
+              required
             />
           </div>
-          <div className="form-group">
+
+          <div className="login-form-group">
             <label htmlFor="password">Password</label>
             <input
               type="password"
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
               placeholder="Enter your password"
+              autoComplete="current-password"
+              disabled={loginMutation.isPending}
+             
+              required
             />
           </div>
-          <button type="submit" className="login-button" disabled={loginMutation.isPending}>
-            {loginMutation.isPending ? 'Logging in...' : 'Log In'}
+
+          <button 
+            type="submit" 
+            className="login-btn" 
+            disabled={loginMutation.isPending || !username || !password}
+          >
+            {loginMutation.isPending ? 'Logging in...' : 'Login'}
           </button>
-          <div className="auth-link">
-            Don&apos;t have an account? <Link to="/register">Sign up</Link>
-          </div>
         </form>
       </div>
     </div>
