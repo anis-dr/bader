@@ -5,6 +5,7 @@ import { api } from '@renderer/utils/trpc'
 import { useMutation } from '@tanstack/react-query'
 import { RegisterInput } from 'src/main/routes/auth'
 import { TRPCClientError } from '@trpc/client'
+import { useAuth } from '@renderer/contexts/auth'
 
 export function RegisterPage() {
   const [username, setUsername] = useState('')
@@ -13,14 +14,16 @@ export function RegisterPage() {
   const [lastName, setLastName] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const registerMutation = useMutation({
     mutationFn: (credentials: RegisterInput) => {
       return api.auth.register.mutate(credentials)
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       setErrorMessage('')
-      navigate('/login')
+      login(data.user, data.tokens)
+      navigate('/dashboard')
     },
     onError: (error) => {
       if (error instanceof TRPCClientError) {
