@@ -1,11 +1,10 @@
 {
   "extends": "@electron-toolkit/tsconfig/tsconfig.web.json",
   "include": [
-    "src/renderer/src/env.d.ts",
-    "src/renderer/src/**/*",
-    "src/renderer/src/**/*.tsx",
-    "src/preload/*.d.ts",
-    "src/main/router.ts"
+    "src/renderer/**/*",
+    "src/preload/**/*",
+    "src/main/routes/**/*",
+    "src/main/utils/**/*"
   ],
   "compilerOptions": {
     "composite": true,

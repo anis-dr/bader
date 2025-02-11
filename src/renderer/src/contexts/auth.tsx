@@ -1,18 +1,14 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
+import type { AuthOutput } from 'src/main/routes/auth'
 
-interface User {
-  id: number
-  username: string
-  firstName?: string | null
-  lastName?: string | null
-  role: string
-}
+type User = AuthOutput['user']
+type Token = AuthOutput['token']
 
 interface AuthContextType {
   user: User | null
-  token: string | null
-  login: (user: User, token: string) => void
+  token: Token | null
+  login: (user: User, token: Token) => void
   logout: () => void
   isLoading: boolean
 }

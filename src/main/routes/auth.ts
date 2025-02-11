@@ -13,6 +13,19 @@ const SALT_ROUNDS = 10
 export type LoginInput = RouterInput['auth']['login']
 export type RegisterInput = RouterInput['auth']['register']
 
+const AuthOutputSchema = z.object({
+  user: z.object({
+    id: z.number(),
+    username: z.string(),
+    firstName: z.string().optional().nullable(),
+    lastName: z.string().optional().nullable(),
+    role: z.string()
+  }),
+  token: z.string()
+})
+
+export type AuthOutput = z.infer<typeof AuthOutputSchema>
+
 export const authRouter = router({
   register: publicProcedure
     .input(
@@ -23,6 +36,7 @@ export const authRouter = router({
         lastName: z.string().optional()
       })
     )
+    .output(AuthOutputSchema)
     .mutation(async ({ input }) => {
       // Check if user already exists
       const existingUser = await db
@@ -81,6 +95,7 @@ export const authRouter = router({
         password: z.string()
       })
     )
+    .output(AuthOutputSchema)
     .mutation(async ({ input }) => {
       // Find user
       const user = await db.select().from(users).where(eq(users.username, input.username)).get()
