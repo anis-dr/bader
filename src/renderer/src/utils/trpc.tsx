@@ -1,11 +1,6 @@
 import { createTRPCProxyClient, httpLink } from '@trpc/client'
 import { AppRouter } from '../../../main/router'
-import {
-  ACCESS_TOKEN_KEY,
-  REFRESH_TOKEN_KEY,
-  AUTH_USER_KEY,
-  useAuth
-} from '@renderer/contexts/auth'
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from '@renderer/contexts/auth'
 
 let logoutFn: () => void
 
