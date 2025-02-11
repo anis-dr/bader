@@ -8,6 +8,7 @@ files:
   - "!src/*"
   - "out/**/*"
   - "resources/**/*"
+  - "src/main/db/migrations/**/*"
   - "!electron.vite.config.{js,ts,mjs,cjs}"
   - "!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}"
   - "!{.env,.env.*,.npmrc,pnpm-lock.yaml}"
@@ -18,14 +19,15 @@ extraResources:
     filter: ["**/*"]
 asarUnpack:
   - resources/**
+  - "node_modules/better-sqlite3/**/*"
 win:
   executableName: bard
   target:
     - target: nsis
       arch:
         - x64
+  artifactName: ${productName}-Setup-${version}.${ext}
 nsis:
-  artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
@@ -42,7 +44,7 @@ mac:
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${productName}-${version}-mac.${ext}
 linux:
   target:
     - AppImage
@@ -51,8 +53,8 @@ linux:
   maintainer: electronjs.org
   category: Utility
 appImage:
-  artifactName: ${name}-${version}.${ext}
-npmRebuild: false
+  artifactName: ${productName}-${version}-linux.${ext}
+npmRebuild: true
 publish:
   provider: generic
   url: https://example.com/auto-updates
