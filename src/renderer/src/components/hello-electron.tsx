@@ -1,6 +1,6 @@
-import Versions from './components/Versions'
-import electronLogo from './assets/electron.svg'
-import { api } from './providers/trpc'
+import Versions from './Versions'
+import electronLogo from '../assets/electron.svg'
+import { api } from '../utils/trpc'
 import { useQuery } from '@tanstack/react-query'
 
 export const HelloElectron = () => {
