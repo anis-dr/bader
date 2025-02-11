@@ -53,6 +53,55 @@ async function handleTokenRefresh(refreshToken: string): Promise<string> {
   return refreshResult.accessToken
 }
 
+// Request parsing
+function parseRequest(
+  input: string,
+  init?: RequestInit
+): {
+  procedureName: string
+  data: Record<string, unknown> | string | null
+} {
+  const mockUrl = new URL('http://dummy' + input)
+  const procedureName = mockUrl.pathname.replace('/', '')
+
+  let data = mockUrl.searchParams.get('input')
+  if (init?.method === 'POST' && init.body) {
+    data = JSON.parse(init.body.toString())
+  }
+
+  return { procedureName, data }
+}
+
+// Response formatting
+function createSuccessResponse(result: unknown): Response {
+  return new Response(JSON.stringify({ result: { data: result } }), {
+    status: 200,
+    headers: { 'content-type': 'application/json' }
+  })
+}
+
+function createErrorResponse(error: unknown, procedureName: string): Response {
+  const errorData = {
+    code: 'INTERNAL_SERVER_ERROR',
+    httpStatus: 500,
+    path: procedureName
+  }
+
+  return new Response(
+    JSON.stringify({
+      error: {
+        message: formatErrorMessage(error),
+        code: -32000,
+        data: errorData
+      }
+    }),
+    {
+      status: 500,
+      headers: { 'content-type': 'application/json' }
+    }
+  )
+}
+
 // Error handling
 function formatErrorMessage(error: unknown): string {
   if (error instanceof Error) {
@@ -66,6 +115,43 @@ function formatErrorMessage(error: unknown): string {
   return 'An unexpected error occurred'
 }
 
+// Protected request handling
+async function handleProtectedRequest(
+  procedureName: string,
+  data: Record<string, unknown> | string | null,
+  accessToken: string,
+  refreshToken: string | null
+): Promise<Response> {
+  try {
+    const result = await makeRequest({
+      procedureName,
+      data,
+      token: accessToken
+    })
+    return createSuccessResponse(result)
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.includes('Invalid or expired token') &&
+      refreshToken
+    ) {
+      try {
+        const newAccessToken = await handleTokenRefresh(refreshToken)
+        const result = await makeRequest({
+          procedureName,
+          data,
+          token: newAccessToken
+        })
+        return createSuccessResponse(result)
+      } catch (refreshError) {
+        clearAuthData()
+        throw refreshError
+      }
+    }
+    throw error
+  }
+}
+
 // Main TRPC client configuration
 export const api = createTRPCProxyClient<AppRouter>({
   links: [
@@ -76,76 +162,21 @@ export const api = createTRPCProxyClient<AppRouter>({
           throw new Error('Unexpected input format')
         }
 
-        const mockUrl = new URL('http://dummy' + input)
-        const procedureName = mockUrl.pathname.replace('/', '')
-
-        // Handle request data
-        let data = mockUrl.searchParams.get('input')
-        if (init?.method === 'POST' && init.body) {
-          data = JSON.parse(init.body.toString())
-        }
-
-        // Get tokens
+        const { procedureName, data } = parseRequest(input, init)
         const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY)
         const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
 
         try {
           // Handle authenticated requests
           if (accessToken && procedureName !== 'auth.refresh') {
-            try {
-              const result = await makeRequest({
-                procedureName,
-                data,
-                token: accessToken
-              })
-              return new Response(JSON.stringify({ result: { data: result } }))
-            } catch (error) {
-              // Handle token refresh
-              if (
-                error instanceof Error &&
-                error.message.includes('Invalid or expired token') &&
-                refreshToken
-              ) {
-                try {
-                  const newAccessToken = await handleTokenRefresh(refreshToken)
-                  const result = await makeRequest({
-                    procedureName,
-                    data,
-                    token: newAccessToken
-                  })
-                  return new Response(JSON.stringify({ result: { data: result } }))
-                } catch (refreshError) {
-                  clearAuthData()
-                  throw refreshError
-                }
-              }
-              throw error
-            }
+            return await handleProtectedRequest(procedureName, data, accessToken, refreshToken)
           }
 
           // Handle public requests
           const result = await makeRequest({ procedureName, data, token: null })
-          return new Response(JSON.stringify({ result: { data: result } }))
+          return createSuccessResponse(result)
         } catch (error) {
-          return new Response(
-            JSON.stringify({
-              error: {
-                message: formatErrorMessage(error),
-                code: -32000,
-                data: {
-                  code: 'INTERNAL_SERVER_ERROR',
-                  httpStatus: 500,
-                  path: procedureName
-                }
-              }
-            }),
-            {
-              status: 500,
-              headers: {
-                'content-type': 'application/json'
-              }
-            }
-          )
+          return createErrorResponse(error, procedureName)
         }
       }
     })
