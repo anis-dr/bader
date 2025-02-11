@@ -1,25 +1,16 @@
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
 import { db, connection } from './config'
-import { join } from 'path'
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3'
-import { app } from 'electron'
 import * as schema from './schema'
+import { getMigrationsPath } from './migrations'
 
 export async function initializeDatabase(): Promise<BetterSQLite3Database<typeof schema>> {
   try {
-    // Determine the correct migrations path based on the environment
-    const isDev = !app.isPackaged
-    const migrationsFolder = isDev
-      ? join(process.cwd(), 'src/main/db/migrations')
-      : join(process.resourcesPath, 'src/main/db/migrations')
+    const migrationsFolder = getMigrationsPath()
+    console.log('Running migrations from:', migrationsFolder)
 
-    try {
-      console.log('Running migrations from:', migrationsFolder)
-      await migrate(db, { migrationsFolder })
-      console.log('Database migrations completed successfully')
-    } catch (migrateError) {
-      console.error('Migration failed:', migrateError)
-    }
+    migrate(db, { migrationsFolder })
+    console.log('Database migrations completed successfully')
 
     return db
   } catch (error) {
