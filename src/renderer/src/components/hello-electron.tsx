@@ -7,7 +7,7 @@ export const HelloElectron = () => {
   const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
   const { data } = useQuery({
     queryKey: ['greeting', 'hello'],
-    queryFn: () => api.greeting.hello.query({ name: 'Electron' })
+    queryFn: () => api.greeting.hello.query({ name: 'Anis' })
   })
 
   console.log('🚀 ~ data:', data)

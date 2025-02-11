@@ -1,17 +1,38 @@
 import { FormEvent, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import '../styles/login.css'
+import { api } from '@renderer/utils/trpc'
+import { useMutation } from '@tanstack/react-query'
+import { LoginInput } from 'src/main/routes/auth'
+import { TRPCClientError } from '@trpc/client'
 
 export function LoginPage() {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
   const navigate = useNavigate()
+
+  const loginMutation = useMutation({
+    mutationFn: (credentials: LoginInput) => {
+      return api.auth.login.mutate(credentials)
+    },
+    onSuccess: () => {
+      setErrorMessage('')
+      navigate('/dashboard')
+    },
+    onError: (error) => {
+      if (error instanceof TRPCClientError) {
+        setErrorMessage(error.message)
+      } else {
+        setErrorMessage('An unexpected error occurred. Please try again.')
+      }
+    }
+  })
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    // TODO: Implement actual login logic
-    console.log('Login attempt with:', { email, password })
-    navigate('/dashboard')
+    setErrorMessage('')
+    loginMutation.mutate({ username, password })
   }
 
   return (
@@ -19,15 +40,20 @@ export function LoginPage() {
       <div className="login-box">
         <h1>Welcome Back</h1>
         <form onSubmit={handleSubmit} className="login-form">
+          {errorMessage && (
+            <div className="error-message" role="alert">
+              {errorMessage}
+            </div>
+          )}
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="username">Username</label>
             <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="Enter your email"
+              placeholder="Enter your username"
             />
           </div>
           <div className="form-group">
@@ -41,8 +67,8 @@ export function LoginPage() {
               placeholder="Enter your password"
             />
           </div>
-          <button type="submit" className="login-button">
-            Log In
+          <button type="submit" className="login-button" disabled={loginMutation.isPending}>
+            {loginMutation.isPending ? 'Logging in...' : 'Log In'}
           </button>
           <div className="auth-link">
             Don&apos;t have an account? <Link to="/register">Sign up</Link>

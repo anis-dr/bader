@@ -1,23 +1,45 @@
 import { FormEvent, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import '../styles/login.css'
+import { api } from '@renderer/utils/trpc'
+import { useMutation } from '@tanstack/react-query'
+import { RegisterInput } from 'src/main/routes/auth'
+import { TRPCClientError } from '@trpc/client'
 
 export function RegisterPage() {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [name, setName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
   const navigate = useNavigate()
+
+  const registerMutation = useMutation({
+    mutationFn: (credentials: RegisterInput) => {
+      return api.auth.register.mutate(credentials)
+    },
+    onSuccess: () => {
+      setErrorMessage('')
+      navigate('/login')
+    },
+    onError: (error) => {
+      if (error instanceof TRPCClientError) {
+        setErrorMessage(error.message)
+      } else {
+        setErrorMessage('An unexpected error occurred. Please try again.')
+      }
+    }
+  })
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    if (password !== confirmPassword) {
-      alert('Passwords do not match')
-      return
-    }
-    // TODO: Implement actual registration logic
-    console.log('Registration attempt with:', { email, password, name })
-    navigate('/dashboard')
+    setErrorMessage('')
+    registerMutation.mutate({
+      username,
+      password,
+      firstName: firstName || undefined,
+      lastName: lastName || undefined
+    })
   }
 
   return (
@@ -25,26 +47,22 @@ export function RegisterPage() {
       <div className="login-box">
         <h1>Create Account</h1>
         <form onSubmit={handleSubmit} className="login-form">
+          {errorMessage && (
+            <div className="error-message" role="alert">
+              {errorMessage}
+            </div>
+          )}
           <div className="form-group">
-            <label htmlFor="name">Full Name</label>
+            <label htmlFor="username">Username</label>
             <input
               type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="Enter your full name"
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="Enter your email"
+              placeholder="Choose a username"
+              minLength={3}
+              maxLength={50}
             />
           </div>
           <div className="form-group">
@@ -55,24 +73,32 @@ export function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="Enter your password"
+              placeholder="Choose a password"
               minLength={6}
             />
           </div>
           <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
+            <label htmlFor="firstName">First Name</label>
             <input
-              type="password"
-              id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              placeholder="Confirm your password"
-              minLength={6}
+              type="text"
+              id="firstName"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Enter your first name (optional)"
             />
           </div>
-          <button type="submit" className="login-button">
-            Create Account
+          <div className="form-group">
+            <label htmlFor="lastName">Last Name</label>
+            <input
+              type="text"
+              id="lastName"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Enter your last name (optional)"
+            />
+          </div>
+          <button type="submit" className="login-button" disabled={registerMutation.isPending}>
+            {registerMutation.isPending ? 'Creating Account...' : 'Create Account'}
           </button>
           <div className="auth-link">
             Already have an account? <Link to="/login">Log in</Link>
