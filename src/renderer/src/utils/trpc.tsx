@@ -1,8 +1,23 @@
 import { createTRPCProxyClient, httpLink } from '@trpc/client'
 import { AppRouter } from '../../../main/router'
+import {
+  ACCESS_TOKEN_KEY,
+  REFRESH_TOKEN_KEY,
+  AUTH_USER_KEY,
+  useAuth
+} from '@renderer/contexts/auth'
 
-const ACCESS_TOKEN_KEY = 'access_token'
-const REFRESH_TOKEN_KEY = 'refresh_token'
+let logoutFn: () => void
+
+export function setLogoutFunction(fn: () => void) {
+  logoutFn = fn
+}
+
+function clearAuthData() {
+  if (logoutFn) {
+    logoutFn()
+  }
+}
 
 interface RefreshResponse {
   accessToken: string
@@ -46,17 +61,23 @@ export const api = createTRPCProxyClient<AppRouter>({
                 error.message.includes('Invalid or expired token') &&
                 refreshToken
               ) {
-                // Try to refresh the access token
-                const refreshResult = await makeRequest<RefreshResponse>(
-                  'auth.refresh',
-                  { refreshToken },
-                  null
-                )
-                localStorage.setItem(ACCESS_TOKEN_KEY, refreshResult.accessToken)
+                try {
+                  // Try to refresh the access token
+                  const refreshResult = await makeRequest<RefreshResponse>(
+                    'auth.refresh',
+                    { refreshToken },
+                    null
+                  )
+                  localStorage.setItem(ACCESS_TOKEN_KEY, refreshResult.accessToken)
 
-                // Retry the original request with the new access token
-                const result = await makeRequest(procedureName, data, refreshResult.accessToken)
-                return new Response(JSON.stringify({ result: { data: result } }))
+                  // Retry the original request with the new access token
+                  const result = await makeRequest(procedureName, data, refreshResult.accessToken)
+                  return new Response(JSON.stringify({ result: { data: result } }))
+                } catch (refreshError) {
+                  // If refresh failed, clear tokens and redirect to login
+                  clearAuthData()
+                  throw refreshError
+                }
               }
               throw error
             }

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { AuthOutput } from 'src/main/routes/auth'
+import { setLogoutFunction } from '@renderer/utils/trpc'
 
 type User = AuthOutput['user']
 type Tokens = AuthOutput['tokens']
@@ -14,9 +15,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
-const ACCESS_TOKEN_KEY = 'access_token'
-const REFRESH_TOKEN_KEY = 'refresh_token'
-const AUTH_USER_KEY = 'auth_user'
+export const ACCESS_TOKEN_KEY = 'access_token'
+export const REFRESH_TOKEN_KEY = 'refresh_token'
+export const AUTH_USER_KEY = 'auth_user'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -59,6 +60,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(AUTH_USER_KEY)
     navigate('/login')
   }
+
+  useEffect(() => {
+    setLogoutFunction(logout)
+  }, [logout])
 
   return (
     <AuthContext.Provider
