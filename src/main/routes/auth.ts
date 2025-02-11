@@ -42,11 +42,7 @@ export const authRouter = router({
     .output(AuthOutputSchema)
     .mutation(async ({ input }) => {
       // Check if user already exists
-      const existingUser = await db
-        .select()
-        .from(users)
-        .where(eq(users.username, input.username))
-        .get()
+      const existingUser = db.select().from(users).where(eq(users.username, input.username)).get()
 
       if (existingUser) {
         throw new TRPCError({
@@ -59,7 +55,7 @@ export const authRouter = router({
       const hashedPassword = await bcrypt.hash(input.password, SALT_ROUNDS)
 
       // Create new user
-      const newUser = await db
+      const newUser = db
         .insert(users)
         .values({
           username: input.username,
@@ -101,7 +97,7 @@ export const authRouter = router({
     .output(AuthOutputSchema)
     .mutation(async ({ input }) => {
       // Find user
-      const user = await db.select().from(users).where(eq(users.username, input.username)).get()
+      const user = db.select().from(users).where(eq(users.username, input.username)).get()
 
       if (!user) {
         throw new TRPCError({
@@ -147,7 +143,7 @@ export const authRouter = router({
     .mutation(async ({ input }) => {
       const { userId } = verifyRefreshToken(input.refreshToken)
 
-      const user = await db.select().from(users).where(eq(users.id, userId)).get()
+      const user = db.select().from(users).where(eq(users.id, userId)).get()
 
       if (!user) {
         throw new TRPCError({

@@ -5,6 +5,7 @@ import { setLogoutFunction } from '@renderer/utils/trpc'
 
 type User = AuthOutput['user']
 type Tokens = AuthOutput['tokens']
+
 interface AuthContextType {
   user: User | null
   tokens: Tokens | null
