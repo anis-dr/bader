@@ -5,19 +5,22 @@ import { api } from '@renderer/utils/trpc'
 import { useMutation } from '@tanstack/react-query'
 import { LoginInput } from 'src/main/routes/auth'
 import { TRPCClientError } from '@trpc/client'
+import { useAuth } from '@renderer/contexts/auth'
 
 export function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const loginMutation = useMutation({
     mutationFn: (credentials: LoginInput) => {
       return api.auth.login.mutate(credentials)
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       setErrorMessage('')
+      login(data.user, data.token)
       navigate('/dashboard')
     },
     onError: (error) => {

@@ -1,6 +1,8 @@
 import { createTRPCProxyClient, httpLink } from '@trpc/client'
 import { AppRouter } from '../../../main/router'
 
+const AUTH_TOKEN_KEY = 'auth_token'
+
 export const api = createTRPCProxyClient<AppRouter>({
   links: [
     httpLink({
@@ -22,13 +24,17 @@ export const api = createTRPCProxyClient<AppRouter>({
           data = body
         }
 
+        // Get the auth token
+        const token = localStorage.getItem(AUTH_TOKEN_KEY)
+
         try {
           const result = await window.electron.sendTrpcEvent({
             procedureName,
             data: typeof data === 'string' ? data : JSON.stringify(data),
             meta: {
               headers: {
-                'user-agent': 'My Custom Client'
+                'user-agent': 'My Custom Client',
+                ...(token && { authorization: `Bearer ${token}` })
               },
               clientId: 'client-123'
             }

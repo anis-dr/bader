@@ -57,6 +57,8 @@ export const authRouter = router({
       const token = generateToken({
         userId: newUser.id,
         username: newUser.username,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
         role: newUser.role
       })
 
@@ -104,6 +106,8 @@ export const authRouter = router({
       const token = generateToken({
         userId: user.id,
         username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
         role: user.role
       })
 

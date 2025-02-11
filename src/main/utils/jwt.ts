@@ -6,6 +6,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key' // In production,
 export interface JWTPayload {
   userId: number
   username: string
+  firstName?: string | null
+  lastName?: string | null
   role: string
 }
 
