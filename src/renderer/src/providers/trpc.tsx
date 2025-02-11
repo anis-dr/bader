@@ -1,24 +1,24 @@
-import { ipcLink } from 'electron-trpc/renderer'
-import { useState } from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import superjson from 'superjson'
-import { createTRPCReact } from '@trpc/react-query'
+import { createTRPCProxyClient, httpLink } from '@trpc/client'
 import { AppRouter } from '../../../main/router'
+export const api = createTRPCProxyClient<AppRouter>({
+  links: [
+    httpLink({
+      url: '',
+      fetch: async (path) => {
+        if (typeof path !== 'string') {
+          throw new Error('Unexpected input format')
+        }
+        const mockUrl = new URL('http://dummy' + path)
+        const procedureName = mockUrl.pathname.replace('/', '')
+        const jsonInput = mockUrl.searchParams.get('input')
 
-export const api = createTRPCReact<AppRouter>()
+        const data = await window.electron.sendTrpcEvent({
+          procedureName,
+          data: jsonInput ?? 'null'
+        })
 
-export const TRPCProvider = ({ children }: { children: React.ReactNode }): JSX.Element => {
-  const [queryClient] = useState(() => new QueryClient())
-  const [trpcClient] = useState(() =>
-    api.createClient({
-      links: [ipcLink()],
-      transformer: superjson
+        return new Response(JSON.stringify({ result: { type: 'data', data } }))
+      }
     })
-  )
-
-  return (
-    <api.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </api.Provider>
-  )
-}
+  ]
+})

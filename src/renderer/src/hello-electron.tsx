@@ -1,11 +1,14 @@
 import Versions from './components/Versions'
 import electronLogo from './assets/electron.svg'
 import { api } from './providers/trpc'
+import { useQuery } from '@tanstack/react-query'
 
-export const HelloElectron = (): JSX.Element => {
+export const HelloElectron = () => {
   const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
-
-  const { data } = api.greeting.hello.useQuery({ name: 'Electron' })
+  const { data } = useQuery({
+    queryKey: ['greeting', 'hello'],
+    queryFn: () => api.greeting.hello.query({ name: 'Electron' })
+  })
 
   console.log('🚀 ~ data:', data)
   return (
