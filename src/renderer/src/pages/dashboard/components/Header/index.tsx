@@ -6,6 +6,7 @@ import { useState } from 'react'
 import CreateCategoryModal from '../Modals/CreateCategoryModal'
 import CreateProductModal from '../Modals/CreateProductModal'
 import CreateSpentModal from '../Modals/CreateSpentModal'
+import { PermissionGuard } from '@renderer/components/PermissionGuard'
 
 export default function Header() {
   const { user, logout } = useAuth()
@@ -37,57 +38,77 @@ export default function Header() {
               <span className="nav-icon">📊</span>
               <span>Dashboard</span>
             </button>
-            <button
-              className={`nav-item ${isActive('/orders') ? 'active' : ''}`}
-              onClick={() => navigate('/orders')}
-            >
-              <span className="nav-icon">📝</span>
-              <span>Orders</span>
-            </button>
-            <button
-              className={`nav-item ${isActive('/reports') ? 'active' : ''}`}
-              onClick={() => navigate('/reports')}
-            >
-              <span className="nav-icon">📈</span>
-              <span>Reports</span>
-            </button>
-            <button
-              className={`nav-item ${isActive('/users') ? 'active' : ''}`}
-              onClick={() => navigate('/users')}
-            >
-              <span className="nav-icon">👥</span>
-              <span>Users</span>
-            </button>
-            <button
-              className={`nav-item ${isActive('/products') ? 'active' : ''}`}
-              onClick={() => navigate('/products')}
-            >
-              <span className="nav-icon">📦</span>
-              <span>Products</span>
-            </button>
+
+            <PermissionGuard permission="orders.view">
+              <button
+                className={`nav-item ${isActive('/orders') ? 'active' : ''}`}
+                onClick={() => navigate('/orders')}
+              >
+                <span className="nav-icon">📝</span>
+                <span>Orders</span>
+              </button>
+            </PermissionGuard>
+
+            <PermissionGuard permission="reports.view">
+              <button
+                className={`nav-item ${isActive('/reports') ? 'active' : ''}`}
+                onClick={() => navigate('/reports')}
+              >
+                <span className="nav-icon">📈</span>
+                <span>Reports</span>
+              </button>
+            </PermissionGuard>
+
+            <PermissionGuard permission="users.view">
+              <button
+                className={`nav-item ${isActive('/users') ? 'active' : ''}`}
+                onClick={() => navigate('/users')}
+              >
+                <span className="nav-icon">👥</span>
+                <span>Users</span>
+              </button>
+            </PermissionGuard>
+
+            <PermissionGuard permission="products.view">
+              <button
+                className={`nav-item ${isActive('/products') ? 'active' : ''}`}
+                onClick={() => navigate('/products')}
+              >
+                <span className="nav-icon">📦</span>
+                <span>Products</span>
+              </button>
+            </PermissionGuard>
           </nav>
         </div>
 
         <div className="header-right">
           <div className="action-buttons">
-            <button className="action-button" onClick={() => setIsCreateCategoryModalOpen(true)}>
-              <span className="action-icon">📁</span>
-              <span>New Category</span>
-            </button>
-            <button
-              className="action-button primary"
-              onClick={() => setIsCreateProductModalOpen(true)}
-            >
-              <span className="action-icon">➕</span>
-              <span>New Product</span>
-            </button>
-            <button 
-              className="action-button warning"
-              onClick={() => setIsCreateSpentModalOpen(true)}
-            >
-              <span className="action-icon">💰</span>
-              <span>New Spent</span>
-            </button>
+            <PermissionGuard permission="categories.create">
+              <button className="action-button" onClick={() => setIsCreateCategoryModalOpen(true)}>
+                <span className="action-icon">📁</span>
+                <span>New Category</span>
+              </button>
+            </PermissionGuard>
+
+            <PermissionGuard permission="products.create">
+              <button
+                className="action-button primary"
+                onClick={() => setIsCreateProductModalOpen(true)}
+              >
+                <span className="action-icon">➕</span>
+                <span>New Product</span>
+              </button>
+            </PermissionGuard>
+
+            <PermissionGuard permission="spents.create">
+              <button 
+                className="action-button warning"
+                onClick={() => setIsCreateSpentModalOpen(true)}
+              >
+                <span className="action-icon">💰</span>
+                <span>New Spent</span>
+              </button>
+            </PermissionGuard>
           </div>
           <div className="user-menu">
             <div className="user-info">

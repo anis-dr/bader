@@ -5,6 +5,7 @@ import { db } from '../db'
 import { categories } from '../db/schema'
 import { eq } from 'drizzle-orm'
 import { RouterInput, RouterOutput } from '../router'
+import { hasPermission } from '../middlewares/permissions'
 
 export type CategoryInput = RouterInput['categories']['create']
 export type CategoryOutput = RouterOutput['categories']['create']
@@ -25,17 +26,18 @@ const UpdateCategorySchema = z.object({
 
 export const categoriesRouter = router({
   // Get all categories
-  getAll: protectedProcedure.query(async () => {
-    try {
-      const result = db.select().from(categories).where(eq(categories.active, true)).all()
-      return result
-    } catch (error) {
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to fetch categories'
-      })
-    }
-  }),
+  getAll: hasPermission('categories.view')
+    .query(async () => {
+      try {
+        const result = db.select().from(categories).where(eq(categories.active, true)).all()
+        return result
+      } catch (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to fetch categories'
+        })
+      }
+    }),
 
   // Get a single category by ID
   getById: protectedProcedure.input(z.number()).query(async ({ input: id }) => {
@@ -52,138 +54,144 @@ export const categoriesRouter = router({
   }),
 
   // Create a new category
-  create: protectedProcedure.input(CreateCategorySchema).mutation(async ({ input, ctx }) => {
-    // Check if user has admin role
-    if (ctx.tokenPayload.role !== 'admin') {
-      throw new TRPCError({
-        code: 'FORBIDDEN',
-        message: 'Only admins can create categories'
-      })
-    }
-
-    try {
-      // Check if category with same name exists
-      const existing = db.select().from(categories).where(eq(categories.name, input.name)).get()
-
-      if (existing) {
+  create: hasPermission('categories.create')
+    .input(CreateCategorySchema)
+    .mutation(async ({ input, ctx }) => {
+      // Check if user has admin role
+      if (ctx.tokenPayload.role !== 'admin') {
         throw new TRPCError({
-          code: 'CONFLICT',
-          message: 'Category with this name already exists'
+          code: 'FORBIDDEN',
+          message: 'Only admins can create categories'
         })
       }
 
-      // Create new category
-      const newCategory = db
-        .insert(categories)
-        .values({
-          name: input.name,
-          description: input.description,
-          active: input.active
-        })
-        .returning()
-        .get()
+      try {
+        // Check if category with same name exists
+        const existing = db.select().from(categories).where(eq(categories.name, input.name)).get()
 
-      return newCategory
-    } catch (error) {
-      if (error instanceof TRPCError) throw error
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to create category'
-      })
-    }
-  }),
-
-  // Update a category
-  update: protectedProcedure.input(UpdateCategorySchema).mutation(async ({ input, ctx }) => {
-    // Check if user has admin role
-    if (ctx.tokenPayload.role !== 'admin') {
-      throw new TRPCError({
-        code: 'FORBIDDEN',
-        message: 'Only admins can update categories'
-      })
-    }
-
-    try {
-      // Check if category exists
-      const existing = db.select().from(categories).where(eq(categories.id, input.id)).get()
-
-      if (!existing) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Category not found'
-        })
-      }
-
-      // If name is being updated, check for duplicates
-      if (input.name && input.name !== existing.name) {
-        const nameExists = db.select().from(categories).where(eq(categories.name, input.name)).get()
-
-        if (nameExists) {
+        if (existing) {
           throw new TRPCError({
             code: 'CONFLICT',
             message: 'Category with this name already exists'
           })
         }
+
+        // Create new category
+        const newCategory = db
+          .insert(categories)
+          .values({
+            name: input.name,
+            description: input.description,
+            active: input.active
+          })
+          .returning()
+          .get()
+
+        return newCategory
+      } catch (error) {
+        if (error instanceof TRPCError) throw error
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create category'
+        })
+      }
+    }),
+
+  // Update a category
+  update: hasPermission('categories.edit')
+    .input(UpdateCategorySchema)
+    .mutation(async ({ input, ctx }) => {
+      // Check if user has admin role
+      if (ctx.tokenPayload.role !== 'admin') {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Only admins can update categories'
+        })
       }
 
-      // Update category
-      const updatedCategory = db
-        .update(categories)
-        .set({
-          ...input
-        })
-        .where(eq(categories.id, input.id))
-        .returning()
-        .get()
+      try {
+        // Check if category exists
+        const existing = db.select().from(categories).where(eq(categories.id, input.id)).get()
 
-      return updatedCategory
-    } catch (error) {
-      if (error instanceof TRPCError) throw error
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to update category'
-      })
-    }
-  }),
+        if (!existing) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Category not found'
+          })
+        }
+
+        // If name is being updated, check for duplicates
+        if (input.name && input.name !== existing.name) {
+          const nameExists = db.select().from(categories).where(eq(categories.name, input.name)).get()
+
+          if (nameExists) {
+            throw new TRPCError({
+              code: 'CONFLICT',
+              message: 'Category with this name already exists'
+            })
+          }
+        }
+
+        // Update category
+        const updatedCategory = db
+          .update(categories)
+          .set({
+            ...input
+          })
+          .where(eq(categories.id, input.id))
+          .returning()
+          .get()
+
+        return updatedCategory
+      } catch (error) {
+        if (error instanceof TRPCError) throw error
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to update category'
+        })
+      }
+    }),
 
   // Delete (soft delete) a category
-  delete: protectedProcedure.input(z.number()).mutation(async ({ input: id, ctx }) => {
-    // Check if user has admin role
-    if (ctx.tokenPayload?.role !== 'admin') {
-      throw new TRPCError({
-        code: 'FORBIDDEN',
-        message: 'Only admins can delete categories'
-      })
-    }
-
-    try {
-      // Soft delete by setting active to false
-      const deletedCategory = db
-        .update(categories)
-        .set({
-          active: false,
-          updatedAt: new Date().toISOString()
-        })
-        .where(eq(categories.id, id))
-        .returning()
-        .get()
-
-      if (!deletedCategory) {
+  delete: hasPermission('categories.delete')
+    .input(z.number())
+    .mutation(async ({ input: id, ctx }) => {
+      // Check if user has admin role
+      if (ctx.tokenPayload?.role !== 'admin') {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Category not found'
+          code: 'FORBIDDEN',
+          message: 'Only admins can delete categories'
         })
       }
 
-      return deletedCategory
-    } catch (error) {
-      if (error instanceof TRPCError) throw error
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to delete category'
-      })
-    }
-  }),
+      try {
+        // Soft delete by setting active to false
+        const deletedCategory = db
+          .update(categories)
+          .set({
+            active: false,
+            updatedAt: new Date().toISOString()
+          })
+          .where(eq(categories.id, id))
+          .returning()
+          .get()
+
+        if (!deletedCategory) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Category not found'
+          })
+        }
+
+        return deletedCategory
+      } catch (error) {
+        if (error instanceof TRPCError) throw error
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to delete category'
+        })
+      }
+    }),
 
   // Restore a soft-deleted category
   restore: protectedProcedure.input(z.number()).mutation(async ({ input: id, ctx }) => {

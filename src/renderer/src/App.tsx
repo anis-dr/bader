@@ -10,6 +10,7 @@ import { OrdersPage } from './pages/orders'
 import { Toaster } from 'react-hot-toast'
 import { ReportsPage } from './pages/reports'
 import { ProductsPage } from './pages/products'
+import { UsersPage } from './pages/users'
 
 const queryClient = new QueryClient()
 
@@ -27,6 +28,7 @@ export default function App() {
                 <Route path="/orders" element={<OrdersPage />} />
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/products" element={<ProductsPage />} />
+                <Route path="/users" element={<UsersPage />} />
               </Route>
 
               {/* Guest Routes */}

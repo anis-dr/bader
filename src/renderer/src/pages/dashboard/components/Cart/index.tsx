@@ -5,6 +5,7 @@ import CreateClientModal from '../Modals/CreateClientModal'
 import './styles.css'
 import { useQuery } from '@tanstack/react-query'
 import CheckoutModal from '../Modals/CheckoutModal'
+import { PermissionGuard } from '@renderer/components/PermissionGuard'
 
 export default function Cart() {
   const { items: cartItems, removeFromCart, updateQuantity } = useCart()
@@ -39,6 +40,8 @@ export default function Cart() {
             </option>
           ))}
         </select>
+        <PermissionGuard permission="clients.create">
+
         <button
           onClick={() => setIsCreateClientModalOpen(true)}
           className="create-client-btn"
@@ -46,6 +49,8 @@ export default function Cart() {
         >
           +
         </button>
+        </PermissionGuard>
+
       </div>
 
       <div className="cart-items">
