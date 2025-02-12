@@ -50,14 +50,20 @@
   border-color: #cbd5e0;
 }
 
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
+.financial-overview {
+  overflow-x: auto;
   margin-bottom: 2rem;
 }
 
-.metric-card {
+.stats-grid {
+  display: flex;
+  gap: 1.5rem;
+  min-width: min-content;
+}
+
+.metric-card, .stat-card {
+  flex: 1;
+  min-width: 240px;
   background: white;
   padding: 1.5rem;
   border-radius: 0.75rem;
@@ -208,4 +214,15 @@
   height: 200px;
   color: #64748b;
   font-size: 0.875rem;
+}
+
+.unpaid-amount {
+  font-size: 0.875rem;
+  color: var(--warning);
+  margin-top: 0.5rem;
+}
+
+.not-tracked {
+  color: var(--text-gray);
+  font-style: italic;
 }

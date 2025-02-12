@@ -41,15 +41,20 @@ export function ReportsPage() {
       dayjs(spent.createdAt).isBefore(dayjs(dateRange.to).endOf('day'))
   ) || []
 
+  // Calculate totals
+  const totalSales = orders?.reduce((sum, order) => sum + order.total, 0) || 0
+  const unpaidAmount = orders?.reduce((sum, order) => 
+    order.status === 'unpaid' ? sum + order.total : sum, 0) || 0
+
   // Calculate metrics
   const metrics = {
-    totalSales: filteredOrders.reduce((sum, order) => sum + order.total, 0),
+    totalSales: totalSales,
     totalSpents: filteredSpents.reduce((sum, spent) => sum + spent.amount, 0),
-    netIncome: filteredOrders.reduce((sum, order) => sum + order.total, 0) - 
+    netIncome: totalSales - 
                (filteredSpents?.reduce((sum, spent) => sum + spent.amount, 0) || 0),
     totalOrders: filteredOrders.length,
     averageOrderValue: filteredOrders.length
-      ? filteredOrders.reduce((sum, order) => sum + order.total, 0) / filteredOrders.length
+      ? totalSales / filteredOrders.length
       : 0,
     completedOrders: filteredOrders.filter((o) => o.status === 'completed').length,
     unpaidOrders: filteredOrders.filter((o) => o.status === 'unpaid').length,
@@ -60,7 +65,7 @@ export function ReportsPage() {
   const productMetrics =
     products?.map((product) => ({
       name: product.name,
-      stock: product.stockQuantity,
+      stock: product.trackStock ? product.stockQuantity : 'Stock not tracked',
       totalSold: filteredOrders.reduce((sum, order) => {
         const orderItem = order.items?.find((item) => item.product.id === product.id)
         return sum + (orderItem?.quantity || 0)
@@ -91,36 +96,39 @@ export function ReportsPage() {
           <DateRangePicker from={dateRange.from} to={dateRange.to} onUpdate={setDateRange} />
         </div>
 
-        {/* Key Metrics */}
-        <div className="metrics-grid">
-          <div className="metric-card">
-            <h3>Total Sales</h3>
-            <p className="metric-value">{metrics.totalSales.toFixed(2)} DT</p>
-          </div>
-          <div className="metric-card">
-            <h3>Total Spents</h3>
-            <p className="metric-value danger">{metrics.totalSpents.toFixed(2)} DT</p>
-          </div>
-          <div className="metric-card">
-            <h3>Net Income</h3>
-            <p className={`metric-value ${metrics.netIncome >= 0 ? 'success' : 'danger'}`}>
-              {metrics.netIncome.toFixed(2)} DT
-            </p>
-          </div>
-          <div className="metric-card">
-            <h3>Order Status</h3>
-            <div className="status-breakdown">
-              <div className="status-item completed">
-                <span>Completed</span>
-                <span>{metrics.completedOrders}</span>
-              </div>
-              <div className="status-item unpaid">
-                <span>Unpaid</span>
-                <span>{metrics.unpaidOrders}</span>
-              </div>
-              <div className="status-item cancelled">
-                <span>Cancelled</span>
-                <span>{metrics.cancelledOrders}</span>
+        <div className="financial-overview">
+          <div className="stats-grid">
+
+            <div className="metric-card">
+              <h3>Total Sales</h3>
+              <p className="metric-value danger">Paid: {totalSales.toFixed(2)} DT</p>
+              <p className="metric-value danger">Unpaid: {unpaidAmount.toFixed(2)} DT</p>
+            </div>
+            <div className="metric-card">
+              <h3>Total Spents</h3>
+              <p className="metric-value danger">{metrics.totalSpents.toFixed(2)} DT</p>
+            </div>
+            <div className="metric-card">
+              <h3>Net Income</h3>
+              <p className={`metric-value ${metrics.netIncome >= 0 ? 'success' : 'danger'}`}>
+                {metrics.netIncome.toFixed(2)} DT
+              </p>
+            </div>
+            <div className="metric-card">
+              <h3>Order Status</h3>
+              <div className="status-breakdown">
+                <div className="status-item completed">
+                  <span>Completed</span>
+                  <span>{metrics.completedOrders}</span>
+                </div>
+                <div className="status-item unpaid">
+                  <span>Unpaid</span>
+                  <span>{metrics.unpaidOrders}</span>
+                </div>
+                <div className="status-item cancelled">
+                  <span>Cancelled</span>
+                  <span>{metrics.cancelledOrders}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -151,14 +159,18 @@ export function ReportsPage() {
                 {productMetrics.map((product) => (
                   <tr key={product.name}>
                     <td>{product.name}</td>
-                    <td>{product.stock}</td>
+                    <td className={typeof product.stock === 'string' ? 'not-tracked' : ''}>
+                      {product.stock}
+                    </td>
                     <td>{product.totalSold}</td>
                     <td>
                       <div className="performance-bar">
                         <div
                           className="performance-fill"
                           style={{
-                            width: `${Math.min((product.totalSold / (product.totalSold + product.stock)) * 100, 100)}%`
+                            width: product.stock === 'Not tracked' 
+                              ? '0%' 
+                              : `${Math.min((product.totalSold / (product.totalSold + (product.stock as number))) * 100, 100)}%`
                           }}
                         />
                       </div>
