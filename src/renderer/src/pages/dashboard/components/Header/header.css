@@ -37,7 +37,7 @@
   border-radius: 8px;
   border: none;
   background: transparent;
-  color: var(--text-gray);
+  color: var(--text-dark);
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 500;
