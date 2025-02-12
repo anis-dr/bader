@@ -21,5 +21,3 @@ CREATE TABLE `users` (
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `users_username_unique` ON `users` (`username`);
-
-INSERT INTO `users` (`username`, `password`, `role`) VALUES ('admin', 'adminadmin', 'admin');
