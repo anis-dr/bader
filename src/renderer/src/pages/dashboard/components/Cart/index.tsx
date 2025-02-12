@@ -182,9 +182,9 @@ export default function Cart() {
             cartItems.map((item) => (
               <div key={item.id} className="cart-item">
                 <div className="item-details">
-                  <h3>{item.name}</h3>
+                  <h3 title={item.name}>{item.name}</h3>
                   <div className="quantity-controls">
-                  <button
+                    <button
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
                       className="quantity-btn"
                       disabled={item.quantity <= 1}
@@ -199,13 +199,15 @@ export default function Cart() {
                       +
                     </button>
                   </div>
-                  <span className="item-price">{(item.price * item.quantity).toFixed(2)} DT</span>
-
+                  <div className="item-price">
+                    <span>{(item.price * item.quantity).toFixed(2)} DT</span>
                     <button onClick={() => removeFromCart(item.id)} className="remove-btn">
-                    ×
-                  </button>
+                      ×
+                    </button>
+
+                  </div>
+                
                 </div>
-              
               </div>
             ))
           )}
