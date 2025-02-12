@@ -13,13 +13,18 @@ export async function initializeDatabase(): Promise<BetterSQLite3Database<typeof
     migrate(db, { migrationsFolder })
     console.log('Database migrations completed successfully')
 
-    const hashedPassword = await bcrypt.hash('adminadmin01', 10)
-    await db.insert(schema.users).values({
-      username: 'admin',
+    const user = await db.select().from(schema.users).limit(1)
+    if (user.length === 0) {
+      const hashedPassword = await bcrypt.hash('adminadmin01', 10)
+      await db.insert(schema.users).values({
+        username: 'admin',
       password: hashedPassword,
       role: 'admin',
       active: 1
     })
+    }else{
+      console.log('Default user already exists')
+    }
 
     return db
   } catch (error) {
