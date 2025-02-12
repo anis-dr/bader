@@ -4,10 +4,12 @@ import { api } from '@renderer/utils/trpc'
 import Header from '../dashboard/components/Header'
 import { toast } from 'react-hot-toast'
 import './styles.css'
+import EditProductModal from './components/EditProductModal'
 
 export function ProductsPage() {
   const [activeTab, setActiveTab] = useState<'products' | 'categories'>('products')
   const queryClient = useQueryClient()
+  const [editingProduct, setEditingProduct] = useState<null | any>(null)
 
   const { data: products, isLoading: productsLoading } = useQuery({
     queryKey: ['products.getAll'],
@@ -94,7 +96,8 @@ export function ProductsPage() {
                       <td className="actions">
                         <button
                           className="edit-btn"
-                          onClick={() => {/* TODO: Implement edit */}}
+                          onClick={() => setEditingProduct(product)}
+                          title="Edit product"
                         >
                           ✏️
                         </button>
@@ -159,6 +162,14 @@ export function ProductsPage() {
           </div>
         )}
       </div>
+
+      {editingProduct && (
+        <EditProductModal
+          isOpen={!!editingProduct}
+          onClose={() => setEditingProduct(null)}
+          product={editingProduct}
+        />
+      )}
     </>
   )
 } 

@@ -4,7 +4,6 @@ import { TRPCError } from '@trpc/server'
 import { db } from '../db'
 import { products, categories, orderItems } from '../db/schema'
 import { eq, and } from 'drizzle-orm'
-import type { Product } from '../db/schema/products'
 import { RouterInput, RouterOutput } from '../router'
 
 export type ProductInput = RouterInput['products']['create']
@@ -160,7 +159,7 @@ export const productsRouter = router({
         if (error instanceof TRPCError) throw error
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: error.message
+          message: 'Failed to create product'
         })
       }
     }),
