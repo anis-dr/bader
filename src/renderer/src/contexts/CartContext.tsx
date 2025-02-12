@@ -5,6 +5,7 @@ interface Product {
   name: string
   price: number
   image?: string
+  quantity: number
 }
 
 interface CartItem extends Product {

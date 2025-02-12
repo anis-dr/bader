@@ -197,5 +197,26 @@ export const clientsRouter = router({
         message: 'Failed to restore client'
       })
     }
+  }),
+
+  getPassager: protectedProcedure.query(async () => {
+    // Try to find the existing Passager client
+    let passager = db.select().from(clients).where(eq(clients.name, 'Passager')).get()
+
+    // If Passager doesn't exist, create it
+    if (!passager) {
+      passager = db
+        .insert(clients)
+        .values({
+          name: 'Passager',
+          phone: '',
+          address: '',
+          active: true
+        })
+        .returning()
+        .get()
+    }
+
+    return passager
   })
 })

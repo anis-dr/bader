@@ -48,7 +48,7 @@ export default function CheckoutModal({ isOpen, onClose, clientId, total }: Chec
       resetForm()
     },
     onError: (error) => {
-      toast.error(error.message || 'Failed to create order')
+      toast.error(error)
     }
   })
 
