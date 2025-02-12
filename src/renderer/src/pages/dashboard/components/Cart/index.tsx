@@ -1,9 +1,20 @@
 import { useCart } from '@renderer/contexts/CartContext'
+import { useState } from 'react'
+import { api } from '@renderer/utils/trpc'
+import CreateClientModal from '../Modals/CreateClientModal'
 import './styles.css'
+import { useQuery } from '@tanstack/react-query'
 
 export default function Cart() {
   const { items: cartItems, removeFromCart, updateQuantity } = useCart()
+  const [selectedClientId, setSelectedClientId] = useState<number | ''>('')
+  const [isCreateClientModalOpen, setIsCreateClientModalOpen] = useState(false)
 
+  const { data: clients } = useQuery({
+    queryKey: ['clients.getAll'],
+    queryFn: () => api.clients.getAll.query()
+  })
+  
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   return (
@@ -11,6 +22,28 @@ export default function Cart() {
       <div className="cart-header">
         <h2>Cart</h2>
         <span className="item-count">{cartItems.length} items</span>
+      </div>
+
+      <div className="client-selection">
+        <select
+          value={selectedClientId}
+          onChange={(e) => setSelectedClientId(e.target.value ? Number(e.target.value) : '')}
+          className="client-select"
+        >
+          <option value="">Select a client</option>
+          {clients?.map((client) => (
+            <option key={client.id} value={client.id}>
+              {client.name}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={() => setIsCreateClientModalOpen(true)}
+          className="create-client-btn"
+          title="Add new client"
+        >
+          +
+        </button>
       </div>
 
       <div className="cart-items">
@@ -60,11 +93,16 @@ export default function Cart() {
         </div>
         <button 
           className="checkout-btn"
-          disabled={cartItems.length === 0}
+          disabled={cartItems.length === 0 || !selectedClientId}
         >
           Checkout
         </button>
       </div>
+
+      <CreateClientModal
+        isOpen={isCreateClientModalOpen}
+        onClose={() => setIsCreateClientModalOpen(false)}
+      />
     </div>
   )
 } 

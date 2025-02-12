@@ -88,9 +88,9 @@ export default function CreateCategoryModal({ isOpen, onClose }: CreateCategoryM
             <button
               type="submit"
               className="submit-button"
-              disabled={createCategory.isLoading}
+              disabled={createCategory.isPending}
             >
-              {createCategory.isLoading ? 'Creating...' : 'Create'}
+              {createCategory.isPending ? 'Creating...' : 'Create'}
             </button>
           </div>
         </form>
