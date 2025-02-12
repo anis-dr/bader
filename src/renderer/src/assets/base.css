@@ -12,7 +12,7 @@
   --bg-gray: #ecf0f1;
 
   /* Text Colors */
-  --text-dark: #2c3e50;
+  --text-dark: #000;
   --text-gray: #666666;
   --text-light: #95a5a6;
   --text-white: #ffffff;
@@ -49,4 +49,18 @@
   /* Button Colors */
   --btn-primary-gradient: linear-gradient(135deg, var(--primary-light), var(--secondary-light));
   --btn-hover-gradient: linear-gradient(135deg, var(--secondary-light), var(--primary-dark));
-} 
+
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+}

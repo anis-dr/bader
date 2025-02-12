@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './styles.css'
 import { api } from '@renderer/utils/trpc'
 import { useQuery } from '@tanstack/react-query'
+import { useCart } from '@renderer/contexts/CartContext'
 
 interface Product {
   id: number
@@ -16,6 +17,8 @@ export function ProductGrid() {
     queryKey: ['products.getAll'],
     queryFn: () => api.products.getAll.query()
   })
+
+  const { addToCart } = useCart()
 
   return (
     <div className="product-grid">
@@ -32,7 +35,7 @@ export function ProductGrid() {
                 <img src={product.image} alt={product.name} />
               </div>
             )}
-            <div className="product-info">
+            <div className="product-info" onClick={() => addToCart(product)}>
               <h3>{product.name}</h3>
               <div className="product-footer">
                 <span className="product-price">{product.price.toFixed(2)} DT</span>

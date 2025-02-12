@@ -67,6 +67,7 @@
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s;
+  font-size: 0.875rem;
 }
 
 .add-to-cart-btn:hover {

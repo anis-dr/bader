@@ -3,6 +3,7 @@ import Header from './components/Header'
 import Sidebar from './components/Sidebar'
 import Cart from './components/Cart'
 import { ProductGrid } from './components/ProductGrid'
+import { CartProvider } from '@renderer/contexts/CartContext'
 import '../../styles/dashboard.css'
 
 interface DashboardLayoutProps {
@@ -11,15 +12,18 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <div className="dashboard-container">
-      <Header />
-      <div className="dashboard-content">
-        <Sidebar />
-        <main className="main-content">
-          {children}
-        </main>
+    <CartProvider>
+      <div className="dashboard-container">
+        <Header />
+        <div className="dashboard-content">
+          <Sidebar />
+          <main className="main-content">
+            {children}
+          </main>
+          <Cart />
+        </div>
       </div>
-    </div>
+    </CartProvider>
   )
 }
 
