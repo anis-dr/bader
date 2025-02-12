@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import Header from '../dashboard/components/Header'
 import dayjs from 'dayjs'
 import { DateRangePicker } from './components/DateRangePicker'
-import { LineChart, BarChart } from './components/Charts'
+import { LineChart } from './components/Charts'
 import './styles.css'
 
 export function ReportsPage() {

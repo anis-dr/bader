@@ -2,7 +2,7 @@ import { router, protectedProcedure } from '../trpc'
 import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
 import { db } from '../db'
-import { products, categories } from '../db/schema'
+import { products, categories, orderItems } from '../db/schema'
 import { eq, and } from 'drizzle-orm'
 import type { Product } from '../db/schema/products'
 import { RouterInput, RouterOutput } from '../router'
@@ -39,10 +39,26 @@ export const productsRouter = router({
   getAll: protectedProcedure.query(async () => {
     try {
       const result = db
-        .select()
+        .select({
+          id: products.id,
+          name: products.name,
+          price: products.price,
+          description: products.description,
+          image: products.image,
+          stockQuantity: products.stockQuantity,
+          trackStock: products.trackStock,
+          categoryId: products.categoryId,
+          createdAt: products.createdAt,
+          updatedAt: products.updatedAt,
+          category: {
+            id: categories.id,
+            name: categories.name
+          }
+        })
         .from(products)
-        .where(eq(products.active, true))
+        .leftJoin(categories, eq(products.categoryId, categories.id))
         .all()
+
       return result
     } catch (error) {
       throw new TRPCError({
@@ -226,25 +242,28 @@ export const productsRouter = router({
       }
 
       try {
-        // Soft delete by setting active to false
-        const deletedProduct = db
-          .update(products)
-          .set({
-            active: false,
-            updatedAt: new Date().toISOString()
-          })
-          .where(eq(products.id, id))
-          .returning()
-          .get()
+        return db.transaction(async (tx) => {
+          // First delete related order items
+          await tx
+            .delete(orderItems)
+            .where(eq(orderItems.productId, id))
 
-        if (!deletedProduct) {
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'Product not found'
-          })
-        }
+          // Then delete the product
+          const deletedProduct = await tx
+            .delete(products)
+            .where(eq(products.id, id))
+            .returning()
+            .get()
 
-        return deletedProduct
+          if (!deletedProduct) {
+            throw new TRPCError({
+              code: 'NOT_FOUND',
+              message: 'Product not found'
+            })
+          }
+
+          return deletedProduct
+        })
       } catch (error) {
         if (error instanceof TRPCError) throw error
         throw new TRPCError({

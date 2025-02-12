@@ -44,6 +44,13 @@ export default function Header() {
             <span className="nav-icon">👥</span>
             <span>Users</span>
           </button>
+          <button 
+            className={`nav-item ${isActive('/products') ? 'active' : ''}`} 
+            onClick={() => navigate('/products')}
+          >
+            <span className="nav-icon">📦</span>
+            <span>Products</span>
+          </button>
         </nav>
       </div>
       
