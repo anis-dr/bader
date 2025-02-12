@@ -74,14 +74,13 @@ export function LoginPage() {
               placeholder="Enter your password"
               autoComplete="current-password"
               disabled={loginMutation.isPending}
-             
               required
             />
           </div>
 
-          <button 
-            type="submit" 
-            className="login-btn" 
+          <button
+            type="submit"
+            className="login-btn"
             disabled={loginMutation.isPending || !username || !password}
           >
             {loginMutation.isPending ? 'Logging in...' : 'Login'}

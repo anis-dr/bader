@@ -92,18 +92,18 @@
 }
 
 .status-item.completed {
-  background: #C6F6D5;
-  color: #2F855A;
+  background: #c6f6d5;
+  color: #2f855a;
 }
 
 .status-item.unpaid {
-  background: #FED7D7;
-  color: #C53030;
+  background: #fed7d7;
+  color: #c53030;
 }
 
 .status-item.cancelled {
-  background: #E2E8F0;
-  color: #4A5568;
+  background: #e2e8f0;
+  color: #4a5568;
 }
 
 .chart-section {
@@ -200,4 +200,4 @@
   height: 200px;
   color: #64748b;
   font-size: 0.875rem;
-} 
+}

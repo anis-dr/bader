@@ -25,14 +25,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
 
   const addToCart = (product: Product) => {
-    setItems(currentItems => {
-      const existingItem = currentItems.find(item => item.id === product.id)
-      
+    setItems((currentItems) => {
+      const existingItem = currentItems.find((item) => item.id === product.id)
+
       if (existingItem) {
-        return currentItems.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+        return currentItems.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         )
       }
 
@@ -41,16 +39,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   const removeFromCart = (productId: number) => {
-    setItems(currentItems => currentItems.filter(item => item.id !== productId))
+    setItems((currentItems) => currentItems.filter((item) => item.id !== productId))
   }
 
   const updateQuantity = (productId: number, quantity: number) => {
     if (quantity < 1) return
-    
-    setItems(currentItems =>
-      currentItems.map(item =>
-        item.id === productId ? { ...item, quantity } : item
-      )
+
+    setItems((currentItems) =>
+      currentItems.map((item) => (item.id === productId ? { ...item, quantity } : item))
     )
   }
 
@@ -71,4 +67,4 @@ export function useCart() {
     throw new Error('useCart must be used within a CartProvider')
   }
   return context
-} 
+}

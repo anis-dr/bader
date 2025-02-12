@@ -79,12 +79,12 @@
   font-size: 1.25rem;
 }
 
-.tab-button[data-tab="products"]::before {
-  content: "📦";
+.tab-button[data-tab='products']::before {
+  content: '📦';
 }
 
-.tab-button[data-tab="categories"]::before {
-  content: "📁";
+.tab-button[data-tab='categories']::before {
+  content: '📁';
 }
 
 .table-container {
@@ -151,4 +151,4 @@
 .edit-btn:hover,
 .delete-btn:hover {
   opacity: 0.8;
-} 
+}

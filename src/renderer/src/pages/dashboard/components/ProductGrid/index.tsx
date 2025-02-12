@@ -37,7 +37,6 @@ export function ProductGrid() {
             )}
             <div className="product-info" onClick={() => addToCart(product)}>
               <h3>{product.name}</h3>
-            
             </div>
           </div>
         ))

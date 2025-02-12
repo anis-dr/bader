@@ -174,7 +174,9 @@
   font-size: 0.875rem;
   color: #111827;
   background-color: white;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .form-input:focus {
@@ -301,14 +303,15 @@ textarea.form-input {
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  color : var(--text-dark);
+  color: var(--text-dark);
 }
 
 .radio-label input {
   cursor: pointer;
 }
 
-.total-display, .change-display {
+.total-display,
+.change-display {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -328,5 +331,3 @@ textarea.form-input {
 .payment-details {
   margin-bottom: 1rem;
 }
-
-

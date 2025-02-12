@@ -42,15 +42,16 @@ export default function EditProductModal({ isOpen, onClose, product }: EditProdu
   }, [product])
 
   const updateProduct = useMutation({
-    mutationFn: () => api.products.update.mutate({
-      id: product.id,
-      name,
-      price: parseFloat(price),
-      description,
-      stockQuantity: parseInt(stockQuantity),
-      trackStock,
-      categoryId: parseInt(categoryId)
-    }),
+    mutationFn: () =>
+      api.products.update.mutate({
+        id: product.id,
+        name,
+        price: parseFloat(price),
+        description,
+        stockQuantity: parseInt(stockQuantity),
+        trackStock,
+        categoryId: parseInt(categoryId)
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products.getAll'] })
       toast.success('Product updated successfully')
@@ -73,7 +74,9 @@ export default function EditProductModal({ isOpen, onClose, product }: EditProdu
       <div className="modal-content">
         <div className="modal-header">
           <h2>Edit Product</h2>
-          <button className="close-button" onClick={onClose}>×</button>
+          <button className="close-button" onClick={onClose}>
+            ×
+          </button>
         </div>
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-group">
@@ -156,18 +159,10 @@ export default function EditProductModal({ isOpen, onClose, product }: EditProdu
           </div>
 
           <div className="modal-footer">
-            <button
-              type="button"
-              onClick={onClose}
-              className="cancel-button"
-            >
+            <button type="button" onClick={onClose} className="cancel-button">
               Cancel
             </button>
-            <button
-              type="submit"
-              className="submit-button"
-              disabled={updateProduct.isPending}
-            >
+            <button type="submit" className="submit-button" disabled={updateProduct.isPending}>
               {updateProduct.isPending ? 'Updating...' : 'Update Product'}
             </button>
           </div>
@@ -175,4 +170,4 @@ export default function EditProductModal({ isOpen, onClose, product }: EditProdu
       </div>
     </div>
   )
-} 
+}

@@ -11,10 +11,12 @@ export const products = sqliteTable('products', {
   stockQuantity: integer('stockQuantity').notNull().default(0),
   trackStock: integer('trackStock', { mode: 'boolean' }).notNull().default(true),
   active: integer('active', { mode: 'boolean' }).notNull().default(true),
-  categoryId: integer('categoryId').notNull().references(() => categories.id),
+  categoryId: integer('categoryId')
+    .notNull()
+    .references(() => categories.id),
   createdAt: text('createdAt').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updatedAt').default(sql`CURRENT_TIMESTAMP`)
 })
 
 export type Product = typeof products.$inferSelect
-export type NewProduct = typeof products.$inferInsert 
+export type NewProduct = typeof products.$inferInsert

@@ -31,7 +31,7 @@ export default function CheckoutModal({ isOpen, onClose, clientId, total }: Chec
         status: isPaid ? ('completed' as const) : ('unpaid' as const),
         isUnpaid: !isPaid,
         note: !isPaid ? note : undefined,
-        items: cartItems.map(item => ({
+        items: cartItems.map((item) => ({
           productId: item.id,
           quantity: item.quantity,
           price: item.price
@@ -60,12 +60,12 @@ export default function CheckoutModal({ isOpen, onClose, clientId, total }: Chec
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (isPaid && (!amountPaid || Number(amountPaid) < total)) {
       toast.error('Amount paid must be equal to or greater than the total')
       return
     }
-    
+
     if (!isPaid && !note.trim()) {
       toast.error('Please provide a note for unpaid order')
       return
@@ -83,7 +83,9 @@ export default function CheckoutModal({ isOpen, onClose, clientId, total }: Chec
       <div className="modal-content">
         <div className="modal-header">
           <h2>Checkout</h2>
-          <button className="close-button" onClick={onClose}>×</button>
+          <button className="close-button" onClick={onClose}>
+            ×
+          </button>
         </div>
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="payment-type-selector">
@@ -150,18 +152,14 @@ export default function CheckoutModal({ isOpen, onClose, clientId, total }: Chec
           )}
 
           <div className="modal-footer">
-            <button
-              type="button"
-              onClick={onClose}
-              className="cancel-button"
-            >
+            <button type="button" onClick={onClose} className="cancel-button">
               Cancel
             </button>
             <button
               type="submit"
               className="submit-button"
               disabled={
-                createOrder.isPending || 
+                createOrder.isPending ||
                 (isPaid && (!amountPaid || Number(amountPaid) < total)) ||
                 (!isPaid && !note.trim())
               }
@@ -173,4 +171,4 @@ export default function CheckoutModal({ isOpen, onClose, clientId, total }: Chec
       </div>
     </div>
   )
-} 
+}

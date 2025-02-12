@@ -40,7 +40,7 @@ export function DateRangePicker({ from, to, onUpdate }: DateRangePickerProps) {
         />
       </div>
       <div className="date-presets">
-        {presets.map(preset => (
+        {presets.map((preset) => (
           <button
             key={preset.days}
             onClick={() => handlePresetClick(preset.days)}
@@ -52,4 +52,4 @@ export function DateRangePicker({ from, to, onUpdate }: DateRangePickerProps) {
       </div>
     </div>
   )
-} 
+}

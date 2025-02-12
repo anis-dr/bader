@@ -13,7 +13,7 @@ const dbPath = app.isPackaged
 const sqlite = new Database(dbPath)
 
 // Create drizzle database instance
-export const db = drizzle(sqlite)
+export const db = drizzle(sqlite, { schema })
 
 // Export the raw sqlite connection for migrations
 export const connection: DatabaseType = sqlite

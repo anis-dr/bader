@@ -20,15 +20,23 @@ export default function CreateProductModal({ isOpen, onClose }: CreateProductMod
 
   const queryClient = useQueryClient()
 
-  
   // Get categories for the select input
-        const { data: categories } = useQuery({
-          queryKey: ['categories.getAll'],
-          queryFn: () => api.categories.getAll.query()
+  const { data: categories } = useQuery({
+    queryKey: ['categories.getAll'],
+    queryFn: () => api.categories.getAll.query()
   })
 
   const createProduct = useMutation({
-    mutationFn: () => api.products.create.mutate({ name, price: parseFloat(price), description, image, stockQuantity: parseInt(stockQuantity), trackStock, categoryId: parseInt(categoryId) }),
+    mutationFn: () =>
+      api.products.create.mutate({
+        name,
+        price: parseFloat(price),
+        description,
+        image,
+        stockQuantity: parseInt(stockQuantity),
+        trackStock,
+        categoryId: parseInt(categoryId)
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products.getAll'] })
       resetForm()
@@ -177,18 +185,10 @@ export default function CreateProductModal({ isOpen, onClose }: CreateProductMod
           </div>
 
           <div className="modal-footer">
-            <button
-              type="button"
-              onClick={onClose}
-              className="cancel-button"
-            >
+            <button type="button" onClick={onClose} className="cancel-button">
               Cancel
             </button>
-            <button
-              type="submit"
-              className="submit-button"
-              disabled={createProduct.isLoading}
-            >
+            <button type="submit" className="submit-button" disabled={createProduct.isLoading}>
               {createProduct.isLoading ? 'Creating...' : 'Create'}
             </button>
           </div>
@@ -196,4 +196,4 @@ export default function CreateProductModal({ isOpen, onClose }: CreateProductMod
       </div>
     </div>
   )
-} 
+}

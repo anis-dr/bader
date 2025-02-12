@@ -2,18 +2,14 @@ import { initTRPC, TRPCError } from '@trpc/server'
 import { ipcMain } from 'electron'
 import type { TrpcEvent } from '../preload/index.d'
 import type { AppRouter } from './router'
-import { verifyAccessToken } from './utils/jwt'
+import { JWTPayload, verifyAccessToken } from './utils/jwt'
 
 export interface Context {
   meta?: {
     headers?: Record<string, string>
     clientId?: string
   }
-  user?: {
-    id: number
-    username: string
-    role: string
-  }
+  tokenPayload?: JWTPayload
 }
 
 /**
@@ -44,11 +40,11 @@ const isAuthed = t.middleware(async ({ ctx, next }) => {
   }
 
   try {
-    const user = verifyAccessToken(token)
+    const tokenPayload = verifyAccessToken(token)
     return next({
       ctx: {
         ...ctx,
-        user
+        tokenPayload
       }
     })
   } catch (error) {

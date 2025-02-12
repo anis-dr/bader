@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
 
 export const clients = sqliteTable('clients', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -12,4 +12,4 @@ export const clients = sqliteTable('clients', {
 })
 
 export type Client = typeof clients.$inferSelect
-export type NewClient = typeof clients.$inferInsert 
+export type NewClient = typeof clients.$inferInsert

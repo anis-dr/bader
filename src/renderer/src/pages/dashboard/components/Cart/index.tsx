@@ -16,7 +16,7 @@ export default function Cart() {
     queryKey: ['clients.getAll'],
     queryFn: () => api.clients.getAll.query()
   })
-  
+
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   return (
@@ -54,7 +54,7 @@ export default function Cart() {
             <p>Your cart is empty</p>
           </div>
         ) : (
-          cartItems.map(item => (
+          cartItems.map((item) => (
             <div key={item.id} className="cart-item">
               <div className="item-details">
                 <h3>{item.name}</h3>
@@ -62,24 +62,21 @@ export default function Cart() {
               </div>
               <div className="item-actions">
                 <div className="quantity-controls">
-                  <button 
+                  <button
                     onClick={() => updateQuantity(item.id, item.quantity - 1)}
                     className="quantity-btn"
                   >
                     -
                   </button>
                   <span className="quantity">{item.quantity}</span>
-                  <button 
+                  <button
                     onClick={() => updateQuantity(item.id, item.quantity + 1)}
                     className="quantity-btn"
                   >
                     +
                   </button>
                 </div>
-                <button 
-                  onClick={() => removeFromCart(item.id)}
-                  className="remove-btn"
-                >
+                <button onClick={() => removeFromCart(item.id)} className="remove-btn">
                   ×
                 </button>
               </div>
@@ -93,7 +90,7 @@ export default function Cart() {
           <span>Total:</span>
           <span className="total-amount">{total.toFixed(2)} DT</span>
         </div>
-        <button 
+        <button
           className="checkout-btn"
           disabled={cartItems.length === 0 || !selectedClientId}
           onClick={() => setIsCheckoutModalOpen(true)}
@@ -117,4 +114,4 @@ export default function Cart() {
       )}
     </div>
   )
-} 
+}

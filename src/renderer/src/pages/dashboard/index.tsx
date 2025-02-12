@@ -17,9 +17,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <Header />
         <div className="dashboard-content">
           <Sidebar />
-          <main className="main-content">
-            {children}
-          </main>
+          <main className="main-content">{children}</main>
           <Cart />
         </div>
       </div>
@@ -35,4 +33,4 @@ export function DashboardPage() {
       </div>
     </DashboardLayout>
   )
-} 
+}

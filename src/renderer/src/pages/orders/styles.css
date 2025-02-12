@@ -217,8 +217,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .no-results {
@@ -231,11 +235,11 @@
   .orders-container {
     padding: 1rem;
   }
-  
+
   .table-container {
     overflow-x: auto;
   }
-} 
+}
 
 .client-name {
   color: var(--text-dark);
@@ -258,7 +262,8 @@ table {
   border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
   padding: 1rem;
   text-align: left;
   border-bottom: 1px solid #e2e8f0;
@@ -282,18 +287,18 @@ tr:hover {
 }
 
 .status-badge.completed {
-  background-color: #C6F6D5;
-  color: #2F855A;
+  background-color: #c6f6d5;
+  color: #2f855a;
 }
 
 .status-badge.unpaid {
-  background-color: #FED7D7;
-  color: #C53030;
+  background-color: #fed7d7;
+  color: #c53030;
 }
 
 .status-badge.cancelled {
-  background-color: #E2E8F0;
-  color: #4A5568;
+  background-color: #e2e8f0;
+  color: #4a5568;
 }
 
 .pagination {
@@ -336,7 +341,8 @@ tr:hover {
     padding: 1rem;
   }
 
-  th, td {
+  th,
+  td {
     padding: 0.75rem 0.5rem;
   }
 

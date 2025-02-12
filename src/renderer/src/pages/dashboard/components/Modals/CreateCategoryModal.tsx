@@ -48,7 +48,9 @@ export default function CreateCategoryModal({ isOpen, onClose }: CreateCategoryM
       <div className="modal-content">
         <div className="modal-header">
           <h2>Create New Category</h2>
-          <button className="close-button" onClick={onClose}>×</button>
+          <button className="close-button" onClick={onClose}>
+            ×
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
@@ -78,18 +80,10 @@ export default function CreateCategoryModal({ isOpen, onClose }: CreateCategoryM
           </div>
 
           <div className="modal-footer">
-            <button
-              type="button"
-              onClick={onClose}
-              className="cancel-button"
-            >
+            <button type="button" onClick={onClose} className="cancel-button">
               Cancel
             </button>
-            <button
-              type="submit"
-              className="submit-button"
-              disabled={createCategory.isPending}
-            >
+            <button type="submit" className="submit-button" disabled={createCategory.isPending}>
               {createCategory.isPending ? 'Creating...' : 'Create'}
             </button>
           </div>
@@ -97,4 +91,4 @@ export default function CreateCategoryModal({ isOpen, onClose }: CreateCategoryM
       </div>
     </div>
   )
-} 
+}

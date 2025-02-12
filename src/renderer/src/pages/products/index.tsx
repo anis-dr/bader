@@ -86,9 +86,11 @@ export function ProductsPage() {
                       <td>{product.name}</td>
                       <td>{product.price.toFixed(2)} DT</td>
                       <td>
-                        <span className={`stock ${
-                          product.trackStock && product.stockQuantity < 10 ? 'low' : ''
-                        }`}>
+                        <span
+                          className={`stock ${
+                            product.trackStock && product.stockQuantity < 10 ? 'low' : ''
+                          }`}
+                        >
                           {product.trackStock ? product.stockQuantity : 'N/A'}
                         </span>
                       </td>
@@ -133,13 +135,13 @@ export function ProductsPage() {
                   {categories?.map((category) => (
                     <tr key={category.id}>
                       <td>{category.name}</td>
-                      <td>
-                        {products?.filter(p => p.categoryId === category.id).length || 0}
-                      </td>
+                      <td>{products?.filter((p) => p.categoryId === category.id).length || 0}</td>
                       <td className="actions">
                         <button
                           className="edit-btn"
-                          onClick={() => {/* TODO: Implement edit */}}
+                          onClick={() => {
+                            /* TODO: Implement edit */
+                          }}
                         >
                           ✏️
                         </button>
@@ -172,4 +174,4 @@ export function ProductsPage() {
       )}
     </>
   )
-} 
+}

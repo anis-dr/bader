@@ -13,7 +13,7 @@ export const greetingRouter = router({
 
   // Protected greeting that includes user info
   personalGreeting: protectedProcedure.query(({ ctx }) => {
-    return `Hello ${ctx.user?.firstName || ctx.user?.username}! Your role is: ${ctx.user?.role}`
+    return `Hello ${ctx.tokenPayload?.firstName || ctx.tokenPayload?.username}! Your role is: ${ctx.tokenPayload?.role}`
   }),
 
   // Protected greeting with input
@@ -25,7 +25,7 @@ export const greetingRouter = router({
     )
     .mutation(({ ctx, input }) => {
       return {
-        message: `${input.message}, ${ctx.user?.username}!`,
+        message: `${input.message}, ${ctx.tokenPayload?.username}!`,
         timestamp: new Date().toISOString()
       }
     })
