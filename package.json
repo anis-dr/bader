@@ -21,8 +21,7 @@
     "build:linux": "pnpm run build && electron-builder --linux",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
-    "rebuild": "electron-rebuild"
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
@@ -51,7 +50,6 @@
     "drizzle-kit": "^0.30.4",
     "electron": "^33.0.2",
     "electron-builder": "^24.13.3",
-    "electron-rebuild": "^3.2.9",
     "electron-vite": "^2.3.0",
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.34.3",
