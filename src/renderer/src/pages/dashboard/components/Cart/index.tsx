@@ -4,11 +4,13 @@ import { api } from '@renderer/utils/trpc'
 import CreateClientModal from '../Modals/CreateClientModal'
 import './styles.css'
 import { useQuery } from '@tanstack/react-query'
+import CheckoutModal from '../Modals/CheckoutModal'
 
 export default function Cart() {
   const { items: cartItems, removeFromCart, updateQuantity } = useCart()
   const [selectedClientId, setSelectedClientId] = useState<number | ''>('')
   const [isCreateClientModalOpen, setIsCreateClientModalOpen] = useState(false)
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false)
 
   const { data: clients } = useQuery({
     queryKey: ['clients.getAll'],
@@ -94,6 +96,7 @@ export default function Cart() {
         <button 
           className="checkout-btn"
           disabled={cartItems.length === 0 || !selectedClientId}
+          onClick={() => setIsCheckoutModalOpen(true)}
         >
           Checkout
         </button>
@@ -103,6 +106,15 @@ export default function Cart() {
         isOpen={isCreateClientModalOpen}
         onClose={() => setIsCreateClientModalOpen(false)}
       />
+
+      {selectedClientId && (
+        <CheckoutModal
+          isOpen={isCheckoutModalOpen}
+          onClose={() => setIsCheckoutModalOpen(false)}
+          clientId={selectedClientId}
+          total={total}
+        />
+      )}
     </div>
   )
 } 
