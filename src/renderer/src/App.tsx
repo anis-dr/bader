@@ -8,6 +8,7 @@ import { AuthGuard, GuestGuard } from './components/auth-guard'
 import { DashboardPage } from './pages/dashboard'
 import { OrdersPage } from './pages/orders'
 import { Toaster } from 'react-hot-toast'
+import { ReportsPage } from './pages/reports'
 
 const queryClient = new QueryClient()
 
@@ -23,6 +24,7 @@ export default function App() {
               <Route element={<AuthGuard />}>
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/orders" element={<OrdersPage />} />
+                <Route path="/reports" element={<ReportsPage />} />
               </Route>
 
               {/* Guest Routes */}

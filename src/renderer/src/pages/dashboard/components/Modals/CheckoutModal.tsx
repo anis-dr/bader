@@ -20,7 +20,6 @@ export default function CheckoutModal({ isOpen, onClose, clientId, total }: Chec
   const queryClient = useQueryClient()
   const { items: cartItems, clearCart } = useCart()
   const { user } = useAuth()
-  console.log(user)
   const createOrder = useMutation({
     mutationFn: () => {
       const orderData = {
