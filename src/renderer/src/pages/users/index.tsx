@@ -68,7 +68,7 @@ export function UsersPage() {
                   <th>Name</th>
                   <th>Role</th>
                   <th>Status</th>
-                  <th>Actions</th>
+                  {user.role !== 'admin' && <th>Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -86,14 +86,16 @@ export function UsersPage() {
                         {user.active ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td>
-                      <button
-                        className="manage-permissions-btn"
+                    {user.role !== 'admin' && (
+                      <td>
+                        <button
+                          className="manage-permissions-btn"
                         onClick={() => setSelectedUserId(user.id)}
                       >
                         Manage Permissions
-                      </button>
-                    </td>
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
