@@ -18,11 +18,11 @@ export async function initializeDatabase(): Promise<BetterSQLite3Database<typeof
       const hashedPassword = await bcrypt.hash('adminadmin01', 10)
       await db.insert(schema.users).values({
         username: 'admin',
-      password: hashedPassword,
-      role: 'admin',
-      active: 1
-    })
-    }else{
+        password: hashedPassword,
+        role: 'admin',
+        active: 1
+      })
+    } else {
       console.log('Default user already exists')
     }
 
