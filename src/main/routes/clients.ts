@@ -2,8 +2,8 @@ import { router, protectedProcedure } from '../trpc'
 import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
 import { db } from '../db'
-import { clients } from '../db/schema'
-import { eq } from 'drizzle-orm'
+import { clients, users } from '../db/schema'
+import { eq, sql } from 'drizzle-orm'
 import { RouterInput, RouterOutput } from '../router'
 
 export type ClientInput = RouterInput['clients']['create']
@@ -30,8 +30,21 @@ export const clientsRouter = router({
   getAll: protectedProcedure.query(async () => {
     try {
       const result = db
-        .select()
+        .select({
+          id: clients.id,
+          name: clients.name,
+          phone: clients.phone,
+          address: clients.address,
+          active: clients.active,
+          createdAt: clients.createdAt,
+          updatedAt: clients.updatedAt,
+          creator: {
+            id: users.id,
+            name: sql<string>`coalesce(${users.firstName} || ' ' || ${users.lastName}, ${users.username})`.as('name')
+          }
+        })
         .from(clients)
+        .leftJoin(users, eq(clients.creatorId, users.id))
         .where(eq(clients.active, true))
         .all()
       return result
@@ -48,8 +61,21 @@ export const clientsRouter = router({
     .input(z.number())
     .query(async ({ input: id }) => {
       const client = db
-        .select()
+        .select({
+          id: clients.id,
+          name: clients.name,
+          phone: clients.phone,
+          address: clients.address,
+          active: clients.active,
+          createdAt: clients.createdAt,
+          updatedAt: clients.updatedAt,
+          creator: {
+            id: users.id,
+            name: sql<string>`coalesce(${users.firstName} || ' ' || ${users.lastName}, ${users.username})`.as('name')
+          }
+        })
         .from(clients)
+        .leftJoin(users, eq(clients.creatorId, users.id))
         .where(eq(clients.id, id))
         .get()
 
@@ -66,7 +92,7 @@ export const clientsRouter = router({
   // Create a new client
   create: protectedProcedure
     .input(CreateClientSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
         // Create new client
         const newClient = db
@@ -75,7 +101,8 @@ export const clientsRouter = router({
             name: input.name,
             phone: input.phone,
             address: input.address,
-            active: input.active
+            active: input.active,
+            creatorId: ctx.user!.id // Add creator ID from context
           })
           .returning()
           .get()

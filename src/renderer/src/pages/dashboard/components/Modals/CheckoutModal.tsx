@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@renderer/contexts/auth'
 import { useCart } from '@renderer/contexts/CartContext'
 import './modal.css'
+import toast from 'react-hot-toast'
 
 interface CheckoutModalProps {
   isOpen: boolean
@@ -18,15 +19,17 @@ export default function CheckoutModal({ isOpen, onClose, clientId, total }: Chec
   const [note, setNote] = useState('')
   const queryClient = useQueryClient()
   const { items: cartItems, clearCart } = useCart()
-
+  const { user } = useAuth()
+  console.log(user)
   const createOrder = useMutation({
     mutationFn: () => {
       const orderData = {
         clientId,
         total,
+        creatorId: user?.id,
         amountPaid: isPaid ? Number(amountPaid) : 0,
         change: isPaid ? Number(amountPaid) - total : 0,
-        status: isPaid ? 'completed' : 'unpaid',
+        status: isPaid ? ('completed' as const) : ('unpaid' as const),
         isUnpaid: !isPaid,
         note: !isPaid ? note : undefined,
         items: cartItems.map(item => ({
@@ -39,19 +42,36 @@ export default function CheckoutModal({ isOpen, onClose, clientId, total }: Chec
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders.getAll'] })
+      queryClient.invalidateQueries({ queryKey: ['products.getAll'] })
       clearCart()
+      toast.success('Order completed successfully')
       onClose()
+      resetForm()
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to create order')
     }
   })
 
+  const resetForm = () => {
+    setIsPaid(true)
+    setAmountPaid('')
+    setNote('')
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    
     if (isPaid && (!amountPaid || Number(amountPaid) < total)) {
-      return // Show error message
+      toast.error('Amount paid must be equal to or greater than the total')
+      return
     }
+    
     if (!isPaid && !note.trim()) {
-      return // Show error message
+      toast.error('Please provide a note for unpaid order')
+      return
     }
+
     createOrder.mutate()
   }
 
@@ -141,7 +161,8 @@ export default function CheckoutModal({ isOpen, onClose, clientId, total }: Chec
             <button
               type="submit"
               className="submit-button"
-              disabled={createOrder.isPending || 
+              disabled={
+                createOrder.isPending || 
                 (isPaid && (!amountPaid || Number(amountPaid) < total)) ||
                 (!isPaid && !note.trim())
               }

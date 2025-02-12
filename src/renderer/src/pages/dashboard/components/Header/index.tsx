@@ -21,7 +21,7 @@ export default function Header() {
             <span className="nav-icon">📊</span>
             <span>Dashboard</span>
           </button>
-          <button className="nav-item">
+          <button className="nav-item" onClick={() => navigate('/orders')}>
             <span className="nav-icon">📝</span>
             <span>Orders</span>
           </button>

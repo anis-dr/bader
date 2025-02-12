@@ -33,6 +33,7 @@
     "@types/jsonwebtoken": "^9.0.8",
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^11.8.1",
+    "dayjs": "^1.11.13",
     "drizzle-orm": "^0.39.2",
     "jsonwebtoken": "^9.0.2",
     "superjson": "^1.12.3",
@@ -60,5 +61,5 @@
     "react-router-dom": "^7.1.5",
     "typescript": "^5.5.2",
     "vite": "^5.3.1"
-    }
+  }
 }

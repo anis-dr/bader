@@ -2,8 +2,8 @@ import { router, protectedProcedure } from '../trpc'
 import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
 import { db } from '../db'
-import { orders, orderItems, products } from '../db/schema'
-import { eq, and } from 'drizzle-orm'
+import { orders, orderItems, products, users, clients } from '../db/schema'
+import { eq, and, sql } from 'drizzle-orm'
 import { RouterInput, RouterOutput } from '../router'
 
 export type OrderInput = RouterInput['orders']['create']
@@ -18,6 +18,7 @@ const OrderItemSchema = z.object({
 
 const CreateOrderSchema = z.object({
   clientId: z.number(),
+  creatorId: z.number(),
   total: z.number().positive(),
   amountPaid: z.number().min(0),
   change: z.number().default(0),
@@ -36,10 +37,35 @@ const UpdateOrderSchema = z.object({
 })
 
 export const ordersRouter = router({
-  // Get all orders
+  // Get all orders with creator and client info
   getAll: protectedProcedure.query(async () => {
     try {
-      return db.select().from(orders).all()
+      const result = db
+        .select({
+          id: orders.id,
+          total: orders.total,
+          amountPaid: orders.amountPaid,
+          change: orders.change,
+          status: orders.status,
+          note: orders.note,
+          isUnpaid: orders.isUnpaid,
+          createdAt: orders.createdAt,
+          updatedAt: orders.updatedAt,
+          creator: {
+            id: users.id,
+            name: sql<string>`coalesce(${users.firstName} || ' ' || ${users.lastName}, ${users.username})`.as('name')
+          },
+          client: {
+            id: clients.id,
+            name: clients.name
+          }
+        })
+        .from(orders)
+        .leftJoin(users, eq(orders.creatorId, users.id))
+        .leftJoin(clients, eq(orders.clientId, clients.id))
+        .all()
+
+      return result
     } catch (error) {
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -48,14 +74,34 @@ export const ordersRouter = router({
     }
   }),
 
-  // Get order by ID with its items
+  // Get order by ID with its items and related info
   getById: protectedProcedure
     .input(z.number())
     .query(async ({ input: id }) => {
       try {
         const order = db
-          .select()
+          .select({
+            id: orders.id,
+            total: orders.total,
+            amountPaid: orders.amountPaid,
+            change: orders.change,
+            status: orders.status,
+            note: orders.note,
+            isUnpaid: orders.isUnpaid,
+            createdAt: orders.createdAt,
+            updatedAt: orders.updatedAt,
+            creator: {
+              id: users.id,
+              name: sql<string>`coalesce(${users.firstName} || ' ' || ${users.lastName}, ${users.username})`.as('name')
+            },
+            client: {
+              id: clients.id,
+              name: clients.name
+            }
+          })
           .from(orders)
+          .leftJoin(users, eq(orders.creatorId, users.id))
+          .leftJoin(clients, eq(orders.clientId, clients.id))
           .where(eq(orders.id, id))
           .get()
 
@@ -67,8 +113,17 @@ export const ordersRouter = router({
         }
 
         const items = db
-          .select()
+          .select({
+            id: orderItems.id,
+            quantity: orderItems.quantity,
+            price: orderItems.price,
+            product: {
+              id: products.id,
+              name: products.name
+            }
+          })
           .from(orderItems)
+          .leftJoin(products, eq(orderItems.productId, products.id))
           .where(eq(orderItems.orderId, id))
           .all()
 
@@ -90,11 +145,12 @@ export const ordersRouter = router({
         // Start a transaction
         return db.transaction(async (tx) => {
           // Create the order
+          console.log({ctx})
           const newOrder = tx
             .insert(orders)
             .values({
               clientId: input.clientId,
-              creatorId: ctx.user!.id,
+              creatorId: input.creatorId,
               total: input.total,
               amountPaid: input.amountPaid,
               change: input.change,
