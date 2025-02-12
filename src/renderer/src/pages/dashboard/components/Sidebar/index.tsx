@@ -59,7 +59,7 @@ export default function Sidebar() {
             className={`category-item ${activeCategory === category.id ? 'active' : ''}`}
             onClick={() => handleCategoryClick(category.id)}
           >
-            {category.icon || '📦'} {category.name}
+            {category.name}
           </button>
         ))}
       </nav>

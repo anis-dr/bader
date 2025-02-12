@@ -4,12 +4,14 @@ import { categoriesRouter } from './routes/categories'
 import { authRouter } from './routes/auth'
 import { productsRouter } from './routes/products'
 import { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
+import { clientsRouter } from './routes/clients'
 
 export const appRouter = router({
   greeting: greetingRouter,
   auth: authRouter,
   categories: categoriesRouter,
-  products: productsRouter
+  products: productsRouter,
+  clients: clientsRouter
 })
 
 // Export type router type signature,
