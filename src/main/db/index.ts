@@ -3,6 +3,7 @@ import { db, connection } from './config'
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3'
 import * as schema from './schema'
 import { getMigrationsPath } from './migrations'
+import * as bcrypt from 'bcryptjs'
 
 export async function initializeDatabase(): Promise<BetterSQLite3Database<typeof schema>> {
   try {
@@ -11,6 +12,14 @@ export async function initializeDatabase(): Promise<BetterSQLite3Database<typeof
 
     migrate(db, { migrationsFolder })
     console.log('Database migrations completed successfully')
+
+    const hashedPassword = await bcrypt.hash('adminadmin01', 10)
+    await db.insert(schema.users).values({
+      username: 'admin',
+      password: hashedPassword,
+      role: 'admin',
+      active: 1
+    })
 
     return db
   } catch (error) {
