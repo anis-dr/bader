@@ -40,30 +40,60 @@ export const ordersRouter = router({
   // Get all orders with creator and client info
   getAll: protectedProcedure.query(async () => {
     try {
-      const result = db
-        .select({
-          id: orders.id,
-          total: orders.total,
-          amountPaid: orders.amountPaid,
-          change: orders.change,
-          status: orders.status,
-          note: orders.note,
-          isUnpaid: orders.isUnpaid,
-          createdAt: orders.createdAt,
-          updatedAt: orders.updatedAt,
-          creator: {
-            id: users.id,
-            name: sql<string>`coalesce(${users.firstName} || ' ' || ${users.lastName}, ${users.username})`.as('name')
-          },
-          client: {
-            id: clients.id,
-            name: clients.name
-          }
-        })
-        .from(orders)
-        .leftJoin(users, eq(orders.creatorId, users.id))
-        .leftJoin(clients, eq(orders.clientId, clients.id))
-        .all()
+      const result = db.transaction(tx => {
+        const allOrders = tx
+          .select({
+            id: orders.id,
+            total: orders.total,
+            amountPaid: orders.amountPaid,
+            change: orders.change,
+            status: orders.status,
+            note: orders.note,
+            isUnpaid: orders.isUnpaid,
+            createdAt: orders.createdAt,
+            updatedAt: orders.updatedAt,
+            creator: {
+              id: users.id,
+              name: sql<string>`coalesce(${users.firstName} || ' ' || ${users.lastName}, ${users.username})`.as('name')
+            },
+            client: {
+              id: clients.id,
+              name: clients.name
+            }
+          })
+          .from(orders)
+          .leftJoin(users, eq(orders.creatorId, users.id))
+          .leftJoin(clients, eq(orders.clientId, clients.id))
+          .all()
+
+        // Get items for all orders in a single query
+        const items = tx
+          .select({
+            orderId: orderItems.orderId,
+            quantity: orderItems.quantity,
+            price: orderItems.price,
+            product: {
+              id: products.id,
+              name: products.name
+            }
+          })
+          .from(orderItems)
+          .leftJoin(products, eq(orderItems.productId, products.id))
+          .all()
+
+        // Group items by orderId
+        const itemsByOrder = items.reduce((acc, item) => {
+          if (!acc[item.orderId]) acc[item.orderId] = []
+          acc[item.orderId].push(item)
+          return acc
+        }, {} as Record<number, typeof items>)
+
+        // Attach items to their orders
+        return allOrders.map(order => ({
+          ...order,
+          items: itemsByOrder[order.id] || []
+        }))
+      })
 
       return result
     } catch (error) {
@@ -140,64 +170,60 @@ export const ordersRouter = router({
   // Create new order
   create: protectedProcedure
     .input(CreateOrderSchema)
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ input }) => {
       try {
-        // Start a transaction
-        return db.transaction(async (tx) => {
-          // Create the order
-          console.log({ctx})
-          const newOrder = tx
-            .insert(orders)
-            .values({
-              clientId: input.clientId,
-              creatorId: input.creatorId,
-              total: input.total,
-              amountPaid: input.amountPaid,
-              change: input.change,
-              status: input.status,
-              note: input.note,
-              isUnpaid: input.isUnpaid
-            })
-            .returning()
-            .get()
-
-          // Create order items
-          const orderItemsToInsert = input.items.map(item => ({
-            orderId: newOrder.id,
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.price
-          }))
-
-          // Insert all order items
-          const items = tx
-            .insert(orderItems)
-            .values(orderItemsToInsert)
-            .returning()
-            .all()
-
-          // Update product stock quantities if tracking is enabled
+        return await db.transaction(async (tx) => {
+          // Check stock availability
           for (const item of input.items) {
-            const product = tx
+            const product = await tx
               .select()
               .from(products)
               .where(eq(products.id, item.productId))
               .get()
 
-            if (product && product.trackStock) {
-              tx.update(products)
-                .set({
-                  stockQuantity: product.stockQuantity - item.quantity,
-                  updatedAt: new Date().toISOString()
-                })
-                .where(eq(products.id, item.productId))
-                .run()
+            if (product?.trackStock && product.stockQuantity < item.quantity) {
+              throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: `Insufficient stock for product: ${product.name}`
+              })
             }
           }
 
-          return { ...newOrder, items }
+          // Create order
+          const order = await tx
+            .insert(orders)
+            .values(input)
+            .returning()
+            .get()
+
+          // Create order items
+          await tx
+            .insert(orderItems)
+            .values(input.items.map(item => ({
+              orderId: order.id,
+              ...item
+            })))
+
+          // Update stock
+          for (const item of input.items) {
+            await tx
+              .update(products)
+              .set({
+                stockQuantity: sql`${products.stockQuantity} - ${item.quantity}`,
+                updatedAt: new Date().toISOString()
+              })
+              .where(
+                and(
+                  eq(products.id, item.productId),
+                  eq(products.trackStock, true)
+                )
+              )
+          }
+
+          return order
         })
       } catch (error) {
+        if (error instanceof TRPCError) throw error
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to create order'
