@@ -16,7 +16,7 @@ export default function Sidebar() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isCreateCategoryModalOpen, setIsCreateCategoryModalOpen] = useState(false)
   const [isCreateProductModalOpen, setIsCreateProductModalOpen] = useState(false)
-  
+
   // Use useQuery directly
   const { data: categories, isLoading } = useQuery({
     queryKey: ['categories.getAll'],
@@ -65,23 +65,25 @@ export default function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-      <button onClick={() => setIsCreateProductModalOpen(true)}>
-          Add Product
-        </button> 
-        <button onClick={() => setIsCreateCategoryModalOpen(true)}>
-          Add Category
+        <button className="action-button" onClick={() => setIsCreateProductModalOpen(true)}>
+          <span className="action-icon">📁</span>
+          <span>New Product</span>
+        </button>
+        <button className="action-button" onClick={() => setIsCreateCategoryModalOpen(true)}>
+          <span className="action-icon">📁</span>
+          <span>Add Category</span>
         </button>
       </div>
 
-      <CreateCategoryModal 
+      <CreateCategoryModal
         isOpen={isCreateCategoryModalOpen}
         onClose={() => setIsCreateCategoryModalOpen(false)}
       />
 
-      <CreateProductModal 
+      <CreateProductModal
         isOpen={isCreateProductModalOpen}
         onClose={() => setIsCreateProductModalOpen(false)}
       />
     </aside>
   )
-} 
+}
