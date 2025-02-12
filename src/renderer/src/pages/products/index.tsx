@@ -68,7 +68,7 @@ export function ProductsPage() {
         </div>
 
         {activeTab === 'products' ? (
-          <div className="products-section">
+          <div className="product-section">
             <div className="table-container">
               <table className="management-table">
                 <thead>
