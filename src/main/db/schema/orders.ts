@@ -34,7 +34,7 @@ export const orderItems = sqliteTable('order_items', {
     .references(() => orders.id),
   productId: integer('productId')
     .notNull()
-    .references(() => products.id),
+    .references(() => products.id, { onDelete: 'cascade' }),
   createdAt: text('createdAt').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updatedAt').default(sql`CURRENT_TIMESTAMP`)
 })

@@ -2,7 +2,7 @@ import { router, protectedProcedure } from '../trpc'
 import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
 import { db } from '../db'
-import { products, categories, orderItems } from '../db/schema'
+import { products, categories } from '../db/schema'
 import { eq, and } from 'drizzle-orm'
 import { RouterInput, RouterOutput } from '../router'
 
@@ -214,26 +214,16 @@ export const productsRouter = router({
     }
 
     try {
-      return db.transaction(async (tx) => {
-        // First delete related order items
-        await tx.delete(orderItems).where(eq(orderItems.productId, id))
+      const deletedProduct = db.delete(products).where(eq(products.id, id)).returning().get()
 
-        // Then delete the product
-        const deletedProduct = await tx
-          .delete(products)
-          .where(eq(products.id, id))
-          .returning()
-          .get()
+      if (!deletedProduct) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Product not found'
+        })
+      }
 
-        if (!deletedProduct) {
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'Product not found'
-          })
-        }
-
-        return deletedProduct
-      })
+      return deletedProduct
     } catch (error) {
       if (error instanceof TRPCError) throw error
       throw new TRPCError({
