@@ -5,6 +5,7 @@ import Logo from '@renderer/assets/caissTek.png'
 import { useState } from 'react'
 import CreateCategoryModal from '../Modals/CreateCategoryModal'
 import CreateProductModal from '../Modals/CreateProductModal'
+import CreateSpentModal from '../Modals/CreateSpentModal'
 
 export default function Header() {
   const { user, logout } = useAuth()
@@ -12,6 +13,7 @@ export default function Header() {
   const navigate = useNavigate()
   const [isCreateCategoryModalOpen, setIsCreateCategoryModalOpen] = useState(false)
   const [isCreateProductModalOpen, setIsCreateProductModalOpen] = useState(false)
+  const [isCreateSpentModalOpen, setIsCreateSpentModalOpen] = useState(false)
 
   const handleLogout = () => {
     logout()
@@ -79,6 +81,13 @@ export default function Header() {
               <span className="action-icon">➕</span>
               <span>New Product</span>
             </button>
+            <button 
+              className="action-button warning"
+              onClick={() => setIsCreateSpentModalOpen(true)}
+            >
+              <span className="action-icon">💰</span>
+              <span>New Spent</span>
+            </button>
           </div>
           <div className="user-menu">
             <div className="user-info">
@@ -103,6 +112,11 @@ export default function Header() {
       <CreateProductModal
         isOpen={isCreateProductModalOpen}
         onClose={() => setIsCreateProductModalOpen(false)}
+      />
+
+      <CreateSpentModal
+        isOpen={isCreateSpentModalOpen}
+        onClose={() => setIsCreateSpentModalOpen(false)}
       />
     </>
   )

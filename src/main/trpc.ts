@@ -48,7 +48,6 @@ const isAuthed = t.middleware(async ({ ctx, next }) => {
       }
     })
   } catch (error) {
-    window.location.href = '/login'
     throw new TRPCError({
       code: 'UNAUTHORIZED',
       message: 'Invalid or expired token'

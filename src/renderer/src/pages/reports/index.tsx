@@ -23,6 +23,11 @@ export function ReportsPage() {
     queryFn: () => api.products.getAll.query()
   })
 
+  const { data: spents } = useQuery({
+    queryKey: ['spents.getAll'],
+    queryFn: () => api.spents.getAll.query()
+  })
+
   const filteredOrders =
     orders?.filter(
       (order) =>
@@ -30,9 +35,18 @@ export function ReportsPage() {
         dayjs(order.createdAt).isBefore(dayjs(dateRange.to).endOf('day'))
     ) || []
 
+  const filteredSpents = spents?.filter(
+    (spent) =>
+      dayjs(spent.createdAt).isAfter(dateRange.from) &&
+      dayjs(spent.createdAt).isBefore(dayjs(dateRange.to).endOf('day'))
+  ) || []
+
   // Calculate metrics
   const metrics = {
     totalSales: filteredOrders.reduce((sum, order) => sum + order.total, 0),
+    totalSpents: filteredSpents.reduce((sum, spent) => sum + spent.amount, 0),
+    netIncome: filteredOrders.reduce((sum, order) => sum + order.total, 0) - 
+               (filteredSpents?.reduce((sum, spent) => sum + spent.amount, 0) || 0),
     totalOrders: filteredOrders.length,
     averageOrderValue: filteredOrders.length
       ? filteredOrders.reduce((sum, order) => sum + order.total, 0) / filteredOrders.length
@@ -84,12 +98,14 @@ export function ReportsPage() {
             <p className="metric-value">{metrics.totalSales.toFixed(2)} DT</p>
           </div>
           <div className="metric-card">
-            <h3>Total Orders</h3>
-            <p className="metric-value">{metrics.totalOrders}</p>
+            <h3>Total Spents</h3>
+            <p className="metric-value danger">{metrics.totalSpents.toFixed(2)} DT</p>
           </div>
           <div className="metric-card">
-            <h3>Average Order Value</h3>
-            <p className="metric-value">{metrics.averageOrderValue.toFixed(2)} DT</p>
+            <h3>Net Income</h3>
+            <p className={`metric-value ${metrics.netIncome >= 0 ? 'success' : 'danger'}`}>
+              {metrics.netIncome.toFixed(2)} DT
+            </p>
           </div>
           <div className="metric-card">
             <h3>Order Status</h3>

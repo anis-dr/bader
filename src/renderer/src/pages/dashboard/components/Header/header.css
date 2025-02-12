@@ -103,6 +103,15 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+
+
+.action-button.warning:hover {
+  background: var(--warning);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 .user-menu {
   display: flex;
   align-items: center;
