@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import Header from './components/Header'
 import Sidebar from './components/Sidebar'
 import Cart from './components/Cart'
+import { ProductGrid } from './components/ProductGrid'
 import '../../styles/dashboard.css'
 
 interface DashboardLayoutProps {
@@ -25,8 +26,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 export function DashboardPage() {
   return (
     <DashboardLayout>
-      <div className="products-grid">
-        {/* ProductGrid will be implemented here */}
+      <div className="products-container">
+        <ProductGrid />
       </div>
     </DashboardLayout>
   )

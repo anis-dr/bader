@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@renderer/utils/trpc'
-import '../../../../styles/modal.css'
+import { toast } from 'react-hot-toast'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import './modal.css'
 
 interface CreateCategoryModalProps {
   isOpen: boolean
@@ -13,78 +14,83 @@ export default function CreateCategoryModal({ isOpen, onClose }: CreateCategoryM
   const [description, setDescription] = useState('')
   const queryClient = useQueryClient()
 
-  const createMutation = useMutation({
+  const createCategory = useMutation({
     mutationFn: () => api.categories.create.mutate({ name, description }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories.getAll'] })
+      toast.success('Category created successfully')
+      resetForm()
       onClose()
-      setName('')
-      setDescription('')
+    },
+    onError: (error) => {
+      toast.error(error.message)
     }
   })
 
-  if (!isOpen) return null
+  const resetForm = () => {
+    setName('')
+    setDescription('')
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    createMutation.mutate()
+    if (!name.trim()) {
+      toast.error('Category name is required')
+      return
+    }
+    createCategory.mutate()
   }
+
+  if (!isOpen) return null
 
   return (
     <div className="modal-overlay">
       <div className="modal-content">
         <div className="modal-header">
           <h2>Create New Category</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <button className="close-button" onClick={onClose}>×</button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-group">
-            <label htmlFor="name">Category Name</label>
+            <label htmlFor="categoryName">Name *</label>
             <input
+              id="categoryName"
               type="text"
-              id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter category name"
+              className="form-input"
               required
-              minLength={2}
-              maxLength={50}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="description">Description (Optional)</label>
+            <label htmlFor="categoryDescription">Description</label>
             <textarea
-              id="description"
+              id="categoryDescription"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter category description"
+              className="form-input"
               rows={3}
             />
           </div>
 
-          {createMutation.isError && (
-            <div className="error-message">
-              {createMutation.error.message || 'Failed to create category'}
-            </div>
-          )}
-
           <div className="modal-footer">
-            <button 
-              type="button" 
-              className="cancel-btn"
+            <button
+              type="button"
               onClick={onClose}
-              disabled={createMutation.isPending}
+              className="cancel-button"
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
-              className="submit-btn"
-              disabled={!name.trim() || createMutation.isPending}
+            <button
+              type="submit"
+              className="submit-button"
+              disabled={createCategory.isLoading}
             >
-              {createMutation.isPending ? 'Creating...' : 'Create Category'}
+              {createCategory.isLoading ? 'Creating...' : 'Create'}
             </button>
           </div>
         </form>
