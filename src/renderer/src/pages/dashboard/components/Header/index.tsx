@@ -1,35 +1,40 @@
 import { useAuth } from '@renderer/contexts/auth'
-import { useNavigate } from 'react-router-dom'
+import { Link, useLocation , useNavigate } from 'react-router-dom'
 import './header.css'
-import Logo from '@renderer/assets/caisstek.png'
+import Logo from '@renderer/assets/caissTek.png'
 
 export default function Header() {
   const { user, logout } = useAuth()
+  const location = useLocation()
   const navigate = useNavigate()
-
   const handleLogout = () => {
     logout()
     navigate('/login')
   }
+
+  const isActive = (path: string) => {
+    return location.pathname === path
+  }
+
 
   return (
     <header className="dashboard-header">
       <div className="header-left">
         <img src={Logo} alt="CaissTek" className="header-logo" />
         <nav className="header-nav">
-          <button className="nav-item active">
+        <button className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`} onClick={() => navigate('/dashboard')}>
             <span className="nav-icon">📊</span>
             <span>Dashboard</span>
           </button>
-          <button className="nav-item" onClick={() => navigate('/orders')}>
+          <button className={`nav-item ${isActive('/orders') ? 'active' : ''}`} onClick={() => navigate('/orders')}>
             <span className="nav-icon">📝</span>
             <span>Orders</span>
           </button>
-          <button className="nav-item">
+          <button className={`nav-item ${isActive('/reports') ? 'active' : ''}`} onClick={() => navigate('/reports')}>
             <span className="nav-icon">📈</span>
             <span>Reports</span>
           </button>
-          <button className="nav-item">
+          <button className={`nav-item ${isActive('/users') ? 'active' : ''}`} onClick={() => navigate('/users')}>
             <span className="nav-icon">👥</span>
             <span>Users</span>
           </button>
