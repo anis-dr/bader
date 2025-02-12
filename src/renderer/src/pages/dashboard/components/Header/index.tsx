@@ -1,12 +1,18 @@
 import { useAuth } from '@renderer/contexts/auth'
-import { Link, useLocation , useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import './header.css'
 import Logo from '@renderer/assets/caissTek.png'
+import { useState } from 'react'
+import CreateCategoryModal from '../Modals/CreateCategoryModal'
+import CreateProductModal from '../Modals/CreateProductModal'
 
 export default function Header() {
   const { user, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
+  const [isCreateCategoryModalOpen, setIsCreateCategoryModalOpen] = useState(false)
+  const [isCreateProductModalOpen, setIsCreateProductModalOpen] = useState(false)
+
   const handleLogout = () => {
     logout()
     navigate('/login')
@@ -16,13 +22,13 @@ export default function Header() {
     return location.pathname === path
   }
 
-
   return (
+    <>
     <header className="dashboard-header">
       <div className="header-left">
         <img src={Logo} alt="CaissTek" className="header-logo" />
         <nav className="header-nav">
-        <button className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`} onClick={() => navigate('/dashboard')}>
+          <button className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`} onClick={() => navigate('/dashboard')}>
             <span className="nav-icon">📊</span>
             <span>Dashboard</span>
           </button>
@@ -43,11 +49,17 @@ export default function Header() {
       
       <div className="header-right">
         <div className="action-buttons">
-          <button className="action-button">
+          <button 
+            className="action-button"
+            onClick={() => setIsCreateCategoryModalOpen(true)}
+          >
             <span className="action-icon">📁</span>
             <span>New Category</span>
           </button>
-          <button className="action-button primary">
+          <button 
+            className="action-button primary"
+            onClick={() => setIsCreateProductModalOpen(true)}
+          >
             <span className="action-icon">➕</span>
             <span>New Product</span>
           </button>
@@ -70,6 +82,19 @@ export default function Header() {
           </button>
         </div>
       </div>
+
+
     </header>
+      <CreateCategoryModal
+      isOpen={isCreateCategoryModalOpen}
+      onClose={() => setIsCreateCategoryModalOpen(false)}
+    />
+    
+    <CreateProductModal
+      isOpen={isCreateProductModalOpen}
+      onClose={() => setIsCreateProductModalOpen(false)}
+    />
+    </>
+
   )
 } 

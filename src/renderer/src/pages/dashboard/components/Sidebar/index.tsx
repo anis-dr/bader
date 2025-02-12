@@ -2,9 +2,8 @@ import { useState } from 'react'
 import '../../../../styles/sidebar.css'
 import { api } from '@renderer/utils/trpc'
 import { useQuery } from '@tanstack/react-query'
-import CreateCategoryModal from '../Modals/CreateCategoryModal'
-import CreateProductModal from '../Modals/CreateProductModal'
 import '../Modals/modal.css'
+
 interface Category {
   id: number
   name: string
@@ -13,9 +12,6 @@ interface Category {
 
 export default function Sidebar() {
   const [activeCategory, setActiveCategory] = useState<number | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isCreateCategoryModalOpen, setIsCreateCategoryModalOpen] = useState(false)
-  const [isCreateProductModalOpen, setIsCreateProductModalOpen] = useState(false)
 
   // Use useQuery directly
   const { data: categories, isLoading } = useQuery({
@@ -25,7 +21,6 @@ export default function Sidebar() {
 
   const handleCategoryClick = (categoryId: number) => {
     setActiveCategory(categoryId)
-    // Here you'll add logic to filter products by category
   }
 
   if (isLoading) {
@@ -63,27 +58,6 @@ export default function Sidebar() {
           </button>
         ))}
       </nav>
-
-      <div className="sidebar-footer">
-        <button className="action-button" onClick={() => setIsCreateProductModalOpen(true)}>
-          <span className="action-icon">📁</span>
-          <span>New Product</span>
-        </button>
-        <button className="action-button" onClick={() => setIsCreateCategoryModalOpen(true)}>
-          <span className="action-icon">📁</span>
-          <span>Add Category</span>
-        </button>
-      </div>
-
-      <CreateCategoryModal
-        isOpen={isCreateCategoryModalOpen}
-        onClose={() => setIsCreateCategoryModalOpen(false)}
-      />
-
-      <CreateProductModal
-        isOpen={isCreateProductModalOpen}
-        onClose={() => setIsCreateProductModalOpen(false)}
-      />
     </aside>
   )
 }
