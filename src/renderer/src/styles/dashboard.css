@@ -10,7 +10,7 @@
   flex: 1;
   gap: 1rem;
   padding: 1rem;
-  height: calc(100vh - 60px); /* Adjust based on header height */
+  height: calc(100vh - 60px);
   overflow: hidden;
 }
 
