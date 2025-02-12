@@ -240,3 +240,107 @@
 .client-name {
   color: var(--text-dark);
 }
+
+.orders-page {
+  padding: 2rem;
+}
+
+.orders-table {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: auto;
+  margin: 1rem 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+  background-color: #f7fafc;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+tr:hover {
+  background-color: #f7fafc;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-badge.completed {
+  background-color: #C6F6D5;
+  color: #2F855A;
+}
+
+.status-badge.unpaid {
+  background-color: #FED7D7;
+  color: #C53030;
+}
+
+.status-badge.cancelled {
+  background-color: #E2E8F0;
+  color: #4A5568;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.pagination-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  background-color: white;
+  color: #4a5568;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #f7fafc;
+  border-color: #cbd5e0;
+}
+
+.pagination-btn.active {
+  background-color: #4299e1;
+  color: white;
+  border-color: #4299e1;
+}
+
+.pagination-btn:disabled {
+  background-color: #f7fafc;
+  color: #a0aec0;
+  cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .orders-page {
+    padding: 1rem;
+  }
+
+  th, td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .pagination-btn {
+    padding: 0.375rem 0.75rem;
+  }
+}

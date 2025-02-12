@@ -11,7 +11,8 @@ export function OrdersPage() {
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'completed' | 'unpaid' | 'cancelled'>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [pageSize, setPageSize] = useState(10)
-  const [totalPages, setTotalPages] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10 // You can adjust this number
   const [filters, setFilters] = useState({
     page: 1,
     status: 'all'
@@ -35,12 +36,22 @@ export function OrdersPage() {
   };
 
   const { data: orders, isLoading } = useQuery({
-    queryKey: ['orders.getAll', selectedStatus],
-    queryFn: () => api.orders.getAll.query({
-      status: selectedStatus === 'all' ? undefined : selectedStatus,
-      creatorId: user?.role === 'user' ? user.id : undefined
-    })
+    queryKey: ['orders.getAll'],
+    queryFn: () => api.orders.getAll.query()
   })
+
+  if (isLoading) return <div>Loading...</div>
+  if (!orders) return <div>No orders found</div>
+
+  // Calculate pagination
+  const totalPages = Math.ceil(orders.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentOrders = orders.slice(startIndex, endIndex)
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
 
   const filteredOrders = orders?.filter(order => 
     order.id.toString().includes(searchTerm) ||
@@ -127,7 +138,7 @@ export function OrdersPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredOrders?.map((order) => (
+            {currentOrders.map((order) => (
               <tr key={order.id} className="table-row">
                 <td className="table-cell">
                   <span className="order-id">#{order.id}</span>
@@ -173,8 +184,35 @@ export function OrdersPage() {
           </div>
         )}
       </div>
+
+      <div className="pagination">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="pagination-btn"
+        >
+          Previous
+        </button>
+
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          <button
+            key={page}
+            onClick={() => handlePageChange(page)}
+            className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+          >
+            {page}
+          </button>
+        ))}
+
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="pagination-btn"
+        >
+          Next
+        </button>
+      </div>
     </div>
     </>
-
   )
 } 
