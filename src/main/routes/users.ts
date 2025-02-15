@@ -7,6 +7,8 @@ import { z } from 'zod'
 import { eq, inArray } from 'drizzle-orm'
 import * as bcrypt from 'bcryptjs'
 
+
+
 export const usersRouter = router({
   // Get all users
   getAll: protectedProcedure
@@ -105,13 +107,7 @@ export const usersRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Only admin can create users
-      if (ctx.tokenPayload.role !== 'admin') {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'Only admins can create users'
-        })
-      }
+
 
       try {
         return db.transaction(async (tx) => {
@@ -171,6 +167,63 @@ export const usersRouter = router({
           message: 'Failed to create user'
         })
       }
+    }),
+
+  activate: protectedProcedure
+    .input(z.number())
+    .mutation(async ({ input: id, ctx }) => {
+
+
+      try {
+        const updatedUser = db
+          .update(users)
+          .set({ active: 1 })
+          .where(eq(users.id, id))
+          .returning()
+          .get()
+
+        if (!updatedUser) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'User not found'
+          })
+        }
+
+        return updatedUser
+      } catch (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to activate user'
+        })
+      }
+    }),
+
+  deactivate: protectedProcedure
+    .input(z.number())
+    .mutation(async ({ input: id, ctx }) => {
+
+
+      try {
+        const updatedUser = db
+          .update(users)
+          .set({ active: 0 })
+          .where(eq(users.id, id))
+          .returning()
+          .get()
+
+        if (!updatedUser) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'User not found'
+          })
+        }
+
+        return updatedUser
+      } catch (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error.message
+        })
+      }
     })
-    
 }) 

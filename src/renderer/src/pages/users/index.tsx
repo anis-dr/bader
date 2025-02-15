@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { api } from '@renderer/utils/trpc'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Header from '../dashboard/components/Header'
 import UserPermissions from '../dashboard/components/UserPermissions'
 import './styles.css'
 import { useAuth } from '@renderer/contexts/auth'
 import { Navigate } from 'react-router-dom'
 import CreateUserModal from './components/CreateUserModal'
+import { PermissionGuard } from '@renderer/components/PermissionGuard'
+import { toast } from 'react-hot-toast'
 
 export function UsersPage() {
   const { user } = useAuth()
@@ -22,6 +24,30 @@ export function UsersPage() {
   const { data: users, isLoading } = useQuery({
     queryKey: ['users.getAll'],
     queryFn: () => api.users.getAll.query()
+  })
+
+  const queryClient = useQueryClient()
+
+  const activateUser = useMutation({
+    mutationFn: (id: number) => api.users.activate.mutate(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users.getAll'] })
+      toast.success('User activated successfully')
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to activate user')
+    }
+  })
+
+  const deactivateUser = useMutation({
+    mutationFn: (id: number) => api.users.deactivate.mutate(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users.getAll'] })
+      toast.success('User deactivated successfully')
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to deactivate user')
+    }
   })
 
   const filteredUsers = users?.filter(
@@ -88,12 +114,36 @@ export function UsersPage() {
                     </td>
                     {user.role !== 'admin' && (
                       <td>
-                        <button
-                          className="manage-permissions-btn"
-                        onClick={() => setSelectedUserId(user.id)}
-                      >
-                        Manage Permissions
-                        </button>
+                        <div className="action-buttons">
+                          <button
+                            className="manage-permissions-btn"
+                            onClick={() => setSelectedUserId(user.id)}
+                          >
+                            Manage Permissions
+                          </button>
+                          <PermissionGuard permission="users.activate">
+                            {!user.active && (
+                              <button
+                                onClick={() => activateUser.mutate(user.id)}
+                                className="activate-btn"
+                                title="Activate user"
+                              >
+                                Activate
+                              </button>
+                            )}
+                          </PermissionGuard>
+                          <PermissionGuard permission="users.deactivate">
+                            {user.active && (
+                              <button
+                                onClick={() => deactivateUser.mutate(user.id)}
+                                className="deactivate-btn"
+                                title="Deactivate user"
+                              >
+                                Deactivate
+                              </button>
+                            )}
+                          </PermissionGuard>
+                        </div>
                       </td>
                     )}
                   </tr>
